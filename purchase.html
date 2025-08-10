@@ -1,255 +1,63 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>شراء الشهادة - Xlop</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #111; color: #fff; padding: 20px; }
-    input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: none; }
-    label { font-weight: bold; }
-    .container { max-width: 500px; margin: auto; }
-    #paypal-button-container { margin-top: 20px; }
-  </style>
-  <!-- PayPal SDK -->
-  <script src="https://www.paypal.com/sdk/js?client-id=AQ1jivq7U9DEwZ9bwBg&currency=SAR" data-sdk-integration-source="button-factory"></script>
-</head>
-<body>
-  <div class="container">
-    <h1>شراء الشهادة</h1>
-    <label>البريد الإلكتروني</label>
-    <input type="email" id="email" placeholder="example@email.com" required />
-
-    <label>UDID</label>
-    <input type="text" id="udid" placeholder="أدخل UDID الخاص بك" required />
-
-    <label>الخطة</label>
-    <select id="plan">
-      <option value="year">سنة – 59 رس</option>
-      <option value="2year">سنتين – 99 رس</option>
-      <option value="dev">مطور – 139 رس</option>
-    </select>
-
-    <div id="paypal-button-container"></div>
-  </div>
-
-  <script>
-    const planPrices = { year: 59, "2year": 99, dev: 139 };
-
-    function getPlan() {
-      return document.getElementById('plan').value;
-    }
-
-    paypal.Buttons({
-      style: { shape: 'rect', layout: 'vertical', label: 'pay' },
-
-      createOrder: function (data, actions) {
-        const plan = getPlan();
-        const amount = planPrices[plan] || 59;
-        const email = document.getElementById('email').value.trim();
-        const udid = document.getElementById('udid').value.trim();
-
-        if (!email || !udid) {
-          alert('رجاءً أدخل البريد و الـ UDID.');
-          throw new Error('Missing fields');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شراء الشهادة</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
         }
-
-        return actions.order.create({
-          purchase_units: [{
-            description: `Xlop iOS Certificate (${plan})`,
-            amount: { value: amount.toString(), currency_code: 'SAR' }
-          }]
-        });
-      },
-
-      onApprove: function (data, actions) {
-        return actions.order.capture().then(function (details) {
-          const email = document.getElementById('email').value.trim();
-          const udid = document.getElementById('udid').value.trim();
-          const plan = getPlan();
-          const q = new URLSearchParams({ status:'success', udid, email, plan, orderId: data.orderID }).toString();
-          window.location.href = 'success.html?' + q;
-        });
-      },
-
-      onError: function (err) {
-        console.error(err);
-        alert('حصل خطأ في الدفع. جرّب مرة أخرى.');
-      }
-    }).render('#paypal-button-container');
-  </script>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>شراء الشهادة - Xlop</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #111; color: #fff; padding: 20px; }
-    input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: none; }
-    label { font-weight: bold; display: block; margin-top: 10px; }
-    .container { max-width: 500px; margin: auto; }
-    #paypal-button-container { margin-top: 20px; }
-  </style>
-  <!-- PayPal SDK -->
-  <script src="https://www.paypal.com/sdk/js?client-id=AQ1jivq7U9DEwZ9bwBg&currency=SAR"></script>
-</head>
-<body>
-  <div class="container">
-    <h1>شراء الشهادة</h1>
-
-    <label>البريد الإلكتروني</label>
-    <input type="email" id="email" placeholder="example@email.com" required />
-
-    <label>UDID</label>
-    <input type="text" id="udid" placeholder="أدخل UDID الخاص بك" required />
-
-    <label>الخطة</label>
-    <select id="plan">
-      <option value="year">سنة – 59 رس</option>
-      <option value="2year">سنتين – 99 رس</option>
-      <option value="dev">مطور – 139 رس</option>
-    </select>
-
-    <!-- زر الدفع -->
-    <div id="paypal-button-container"></div>
-  </div>
-
-  <script>
-    const planPrices = { year: 59, "2year": 99, dev: 139 };
-
-    function getPlan() {
-      return document.getElementById('plan').value;
-    }
-
-    paypal.Buttons({
-      style: { shape: 'rect', layout: 'vertical', label: 'pay' },
-
-      createOrder: function (data, actions) {
-        const plan = getPlan();
-        const amount = planPrices[plan] || 59;
-        const email = document.getElementById('email').value.trim();
-        const udid = document.getElementById('udid').value.trim();
-
-        if (!email || !udid) {
-          alert('رجاءً أدخل البريد و الـ UDID.');
-          throw new Error('Missing fields');
+        input, select {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
         }
-
-        return actions.order.create({
-          purchase_units: [{
-            description: `Xlop iOS Certificate (${plan})`,
-            amount: { value: amount.toString(), currency_code: 'SAR' }
-          }]
-        });
-      },
-
-      onApprove: function (data, actions) {
-        return actions.order.capture().then(function (details) {
-          alert('تم الدفع بنجاح! رقم الطلب: ' + data.orderID);
-        });
-      },
-
-      onError: function (err) {
-        console.error(err);
-        alert('حصل خطأ في الدفع. جرّب مرة أخرى.');
-      }
-    }).render('#paypal-button-container');
-  </script>
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>شراء الشهادة – Xlop</title>
-  <style>
-    body{background:#0b0b0c;color:#fff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial;margin:0;padding:20px}
-    .wrap{max-width:520px;margin:0 auto}
-    label{display:block;margin:10px 0 6px;font-weight:700}
-    input,select{width:100%;padding:12px;border-radius:10px;border:none;background:#1a1a1d;color:#fff}
-    #paypal-button-container{margin-top:18px}
-    .note{color:#9aa;font-size:13px;margin-top:8px}
-  </style>
-  <!-- PayPal SDK (Client ID + SAR) -->
-  <script src="https://www.paypal.com/sdk/js?client-id=AQ1jivq7U9DEwZ9bwBg&currency=SAR"></script>
+        #paypal-button-container {
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://www.paypal.com/sdk/js?client-id=Adnx8iybU3z3fd00LBR30xdswJtPD7FJA7ZMBO5s4VnZu0sp5KLNdJDklX7ol6cLF65LtQC8c7wpT_lo&currency=SAR"></script>
 </head>
 <body>
-  <div class="wrap">
-    <h1 style="text-align:center;margin-top:10px">شراء الشهادة</h1>
 
-    <label>البريد الإلكتروني</label>
-    <input type="email" id="email" placeholder="example@email.com" required>
-
-    <label>UDID</label>
-    <input type="text" id="udid" placeholder="أدخل UDID الخاص بك" required>
-
-    <label>الخطة</label>
+    <h1>شراء الشهادة</h1>
+    <input type="email" id="email" placeholder="example@email.com">
+    <input type="text" id="udid" placeholder="أدخل UDID الخاص بك">
     <select id="plan">
-      <option value="year">سنة – 59 ر.س</option>
-      <option value="2year" selected>سنتين – 99 ر.س</option>
-      <option value="dev">مطور – 139 ر.س</option>
+        <option value="99">سنتين – 99 رس</option>
+        <option value="59">سنة – 59 رس</option>
     </select>
 
-    <div class="note" id="amountNote">الإجمالي: <b id="amt">99</b> ر.س</div>
-
-    <!-- زر PayPal -->
     <div id="paypal-button-container"></div>
 
-    <p class="note">بالضغط على الدفع، أنت توافق على الشروط وسياسة الخصوصية.</p>
-  </div>
+    <script>
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                let price = document.getElementById("plan").value;
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: price,
+                            currency_code: "SAR"
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    alert('تم الدفع بنجاح بواسطة: ' + details.payer.name.given_name);
+                });
+            }
+        }).render('#paypal-button-container');
+    </script>
 
-  <script>
-    // قراءة udid من الرابط (لو رجع من ملف التعريف)
-    (function autofillUDID(){
-      const p=new URLSearchParams(location.search); const u=p.get('udid');
-      if(u){ const i=document.getElementById('udid'); i.value=u; i.readOnly=true; }
-    })();
-
-    // الأسعار بالريال
-    const prices = { year: 59, "2year": 99, dev: 139 };
-    const planEl = document.getElementById('plan');
-    const amtEl  = document.getElementById('amt');
-
-    function currentPlan(){ return planEl.value; }
-    function currentAmount(){ return prices[currentPlan()] || 59; }
-    function refreshAmount(){ amtEl.textContent = currentAmount(); }
-    planEl.addEventListener('change', refreshAmount);
-    refreshAmount();
-
-    paypal.Buttons({
-      style: { shape:'rect', layout:'vertical', label:'pay' },
-
-      createOrder: function(data, actions) {
-        const email = document.getElementById('email').value.trim();
-        const udid  = document.getElementById('udid').value.trim();
-        if(!email || !udid){ alert('رجاءً أدخل البريد و الـ UDID.'); throw new Error('missing fields'); }
-
-        return actions.order.create({
-          purchase_units: [{
-            description: `Xlop iOS Certificate (${currentPlan()})`,
-            amount: { value: String(currentAmount()), currency_code: 'SAR' }
-          }]
-        });
-      },
-
-      onApprove: function(data, actions) {
-        return actions.order.capture().then(function() {
-          const q = new URLSearchParams({
-            status: 'success',
-            email: document.getElementById('email').value.trim(),
-            udid:  document.getElementById('udid').value.trim(),
-            plan:  currentPlan(),
-            orderId: data.orderID
-          }).toString();
-          location.href = 'success.html?' + q;
-        });
-      },
-
-      onCancel: function(){ location.href = 'error.html'; },
-      onError:  function(){ location.href = 'error.html'; }
-    }).render('#paypal-button-container');
-  </script>
 </body>
-</html></body>
-</html></body>
 </html>
