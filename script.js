@@ -1,0 +1,19 @@
+(function(){
+  // Auto-fill UDID from query
+  const p=new URLSearchParams(location.search);
+  const udid=p.get('udid');
+  if(udid){
+    const targets=[document.querySelector('#udid'), document.querySelector('#udid2')].filter(Boolean);
+    targets.forEach(i=>{ i.value=udid; i.readOnly=true; i.classList.add('filled'); });
+    const got=document.querySelector('#udidStatus');
+    if(got){ got.textContent='تم جلب UDID تلقائيًا'; }
+  }
+  // Smooth scroll for anchors
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click', e=>{
+      const id=a.getAttribute('href');
+      const el=document.querySelector(id);
+      if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
+    });
+  });
+})();

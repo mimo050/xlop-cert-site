@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Xlop Certificates</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="script.js"></script>
+  <meta name="description" content="شهادات توقيع iOS مع جلب UDID تلقائياً.">
+</head>
+<body>
+  <nav class="nav container">
+    <div class="brand">
+      <img src="assets/logo.svg" alt="Xlop">
+      <strong>Xlop Certificates</strong>
+    </div>
+    <div>
+      <a href="#pricing">الأسعار</a>
+      <a href="purchase.html">شراء الشهادة</a>
+      <a href="faq.html">الأسئلة الشائعة</a>
+    </div>
+  </nav>
+
+  <header class="hero container">
+    <div class="badge">يدعم جلب الـ UDID تلقائيًا</div>
+    <h1>شهادات توقيع iOS — بسرعة وثقة</h1>
+    <p>اضغط زر <strong>الحصول على UDID</strong> لتنزيل ملف تعريف مؤقت، ثبّته من الإعدادات، وبنرجّعك للصفحة ورقم جهازك جاهز تلقائيًا.</p>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:12px">
+      <a class="btn" href="https://api.xlop.com/get-udid.php">الحصول على UDID</a>
+      <a class="btn outline" href="purchase.html">شراء الشهادة</a>
+    </div>
+    <p class="note">يُفضل فتح الموقع عبر Safari على iPhone.</p>
+  </header>
+
+  <section class="section container">
+    <div class="grid">
+      <div class="card">
+        <h3>1) احصل على UDID</h3>
+        <p>ينزل ملف تعريف <kbd>.mobileconfig</kbd> من خادمنا الآمن. بعد التثبيت، يرجعك للصفحة ومعك رقم UDID.</p>
+      </div>
+      <div class="card">
+        <h3>2) ادفع بأمان</h3>
+        <p>دفع عبر PayPal (وخيارات إضافية لاحقًا). تصلك فاتورة فورية على بريدك.</p>
+      </div>
+      <div class="card">
+        <h3>3) حمل الشهادة</h3>
+        <p>بعد الدفع، نُصدر الشهادة ونرسل رابط التحميل مباشرةً.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="section container pricing">
+    <h2>الأسعار</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>خطة سنة</h3>
+        <div class="price">59 ر.س</div>
+        <p>مناسبة للاستخدام الشخصي.</p>
+        <a class="btn" href="purchase.html?plan=year">اشترِ الآن</a>
+      </div>
+      <div class="card">
+        <h3>خطة سنتين</h3>
+        <div class="price">99 ر.س</div>
+        <p>قيمة أفضل على المدى الأطول.</p>
+        <a class="btn" href="purchase.html?plan=2year">اشترِ الآن</a>
+      </div>
+      <div class="card">
+        <h3>خطة مطوّر</h3>
+        <div class="price">139 ر.س</div>
+        <p>دعم أولوية + تحديثات.</p>
+        <a class="btn" href="purchase.html?plan=dev">اشترِ الآن</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer container">
+    <div>© <span id="y"></span> Xlop — جميع الحقوق محفوظة</div>
+    <div class="note">باستخدامك للموقع، أنت توافق على سياسة الخصوصية وشروط الاستخدام.</div>
+  </footer>
+  <script>document.getElementById('y').textContent = new Date().getFullYear()</script>
+</body>
+</html>
