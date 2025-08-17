@@ -41,7 +41,7 @@ if (@$doc->loadXML($xml)) {
 }
 
 if ($udid) {
-    $frontend = 'https://xlop.com/'; // replace with your front-end domain
+    $frontend = 'https://xlop-cert-site.vercel.app/'; // replace with your front-end domain
     header('Location: ' . $frontend . '?udid=' . urlencode($udid));
     exit;
 }
