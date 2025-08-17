@@ -1,30 +1,22 @@
-# Xlop UDID Backend (PHP)
+# xlop-cert-site
 
-هذا الباك-إند بسيط لـ iOS Profile Service عشان تجيب UDID تلقائيًا.
-مكوّن من ملفين PHP:
-- `get-udid.php`: ينشئ ملف `mobileconfig` ويجبر iOS يرسل معلومات الجهاز.
-- `udid.php`: يستقبل POST (PKCS#7) من iOS، يفكّه بالـ OpenSSL، يستخرج الـ UDID ويرجع المستخدم لواجهة الفرونت إند.
+واجهة Vercel لاستخراج UDID وربطها مع باك-إند PHP خارجي.
 
-> المتطلبات
-- استضافة تدعم PHP 7.4+ أو 8.x
-- تفعيل OpenSSL في النظام (متوفر عادةً افتراضيًا)
-- شهادة SSL فعّالة على الساب دومين (https إلزامي)
+## خطوات نشر الباك-إند وربط الواجهة
+1. أنشئ حسابًا مجانيًا في 000webhost أو InfinityFree.
+2. افتح File Manager وارفع محتويات مجلد `public/` من `backend-dist.zip` إلى `public_html`.
+3. بعد الرفع، افتح `public/config.php` على السيرفر واستبدل:
+   - `FRONT_URL` برابط مشروع الواجهة على Vercel.
+4. انسخ رابط الموقع الناتج كـ `PHP_BASE_URL` (مثال: `https://yourapp.000webhostapp.com`).
+5. عدّل رابط زر **Get UDID** في `index.html` باستبدال `PHP_BASE_URL` الحقيقي، ثم قم بعمل commit:
+   `fix(frontend): set PHP_BASE_URL to actual backend host`.
+6. اختبر من iPhone: نزّل البروفايل وثبّته → يجب أن يتم تحويلك إلى
+   `FRONT_URL/success.html?udid=XXXX`.
 
-## الإعداد السريع
-1) أنشئ ساب دومين: `api.xlop.com` يوجّه لمجلد مثل `/public_html/api`.
-2) ارفع محتويات هذا المجلد هناك.
-3) حرّر متغيرات الإعداد في أعلى الملفين (الدومين و رابط الرجوع).
-4) جرّب من الآيفون عبر Safari:
-   - افتح: `https://api.xlop.com/get-udid.php`
-   - ثبّت ملف التعريف.
-   - سيعيدك إلى واجهتك مع باراميتر `?udid=`
-5) في واجهتك (GitHub Pages) اقرأ القيمة من `location.search` واملأ الحقل تلقائيًا.
-
-## الأمن
-- الـ UDID يُستخدم فقط لإكمال الطلب. لا تخزّنه بدون سبب.
-- بإمكانك تفعيل تسجيل بسيط في `udid.php` لغايات تتبع الأخطاء.
-- احذف الملفات المؤقتة تلقائيًا (الكود يفعل ذلك بالفعل).
-
-## ملاحظات
-- إذا لم يعمل الاستخراج، تأكد أن `openssl` يعمل على السيرفر (جرّب: `php -i | grep -i openssl`).
-- بعض لوحات الاستضافة تتطلب تفعيل "exec"؛ إذا كانت معطّلة اطلب تفعيلها أو استخدم VPS.
+### أمر اختبار cURL
+```bash
+curl -X POST "PHP_BASE_URL/get-udid.php" \
+  -H "Content-Type: application/x-apple-aspen-device-information" \
+  --data-binary '<plist><dict><key>UDID</key><string>TEST-UDID-123</string></dict></plist>' -i
+```
+يجب أن يرجع 302 إلى `FRONT_URL/success.html?udid=TEST-UDID-123`.
