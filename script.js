@@ -5,6 +5,8 @@
   if(udid){
     const targets=[document.querySelector('#udid'), document.querySelector('#udid2')].filter(Boolean);
     targets.forEach(i=>{ i.value=udid; i.readOnly=true; i.classList.add('filled'); });
+    const getBtn=document.querySelector('.btn[href*="get-udid"]');
+    if(getBtn){ getBtn.style.display='none'; }
     const got=document.querySelector('#udidStatus');
     if(got){
       got.textContent='تم جلب UDID تلقائيًا ✅';
