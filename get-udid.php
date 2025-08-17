@@ -10,7 +10,7 @@ $profile = <<<XML
     <key>PayloadContent</key>
     <dict>
         <key>URL</key>
-        <string>https://api.xlop.com/udid.php</string>
+        <string>https://api.bedpage.com/udid.php</string>
         <key>DeviceAttributes</key>
         <array>
             <string>UDID</string>
