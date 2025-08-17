@@ -34,8 +34,8 @@ $profile = <<<XML
 </plist>
 XML;
 
-$cert = 'file://path/to/certificate.pem'; // replace with actual certificate path
-$privkey = 'file://path/to/private.key'; // replace with actual private key path
+$cert = 'file:///etc/ssl/certs/api.bedpage.com.pem'; // replace with actual certificate path
+$privkey = 'file:///etc/ssl/private/api.bedpage.com.key'; // replace with actual private key path
 $passphrase = ''; // set passphrase if the private key is protected
 
 $tempIn = tempnam(sys_get_temp_dir(), 'profile');
