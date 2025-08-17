@@ -6,7 +6,10 @@
     const targets=[document.querySelector('#udid'), document.querySelector('#udid2')].filter(Boolean);
     targets.forEach(i=>{ i.value=udid; i.readOnly=true; i.classList.add('filled'); });
     const got=document.querySelector('#udidStatus');
-    if(got){ got.textContent='تم جلب UDID تلقائيًا'; }
+    if(got){
+      got.textContent='تم جلب UDID تلقائيًا ✅';
+      got.style.display='block';
+    }
   }
   // Smooth scroll for anchors
   document.querySelectorAll('a[href^="#"]').forEach(a=>{
