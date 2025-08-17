@@ -2,6 +2,12 @@
 
 واجهة Vercel لاستخراج UDID وربطها مع باك-إند PHP خارجي.
 
+## Backend PHP
+- الواجهة تُبقي على Vercel.
+- الباك-إند يُرفع على استضافة PHP (000webhost/InfinityFree…).
+- استبدل `PHP_BASE_URL` في رابط الزر بعد معرفة الرابط الفعلي.
+- التدفّق: يفتح `profile.php` → يثبّت البروفايل على iPhone → iOS يرسل POST إلى `get-udid.php` → إعادة توجيه إلى `success.html?udid=…`.
+
 ## خطوات نشر الباك-إند وربط الواجهة
 1. أنشئ حسابًا مجانيًا في 000webhost أو InfinityFree.
 2. افتح File Manager وارفع محتويات مجلد `public/` من `backend-dist.zip` إلى `public_html`.
