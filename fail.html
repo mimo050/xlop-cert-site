@@ -22,7 +22,9 @@
   </div>
   <p class="mt-24">للدعم تواصل عبر <a href="https://wa.me/1234567890" target="_blank">واتساب</a> أو <a href="https://t.me/xlop_support" target="_blank">تليجرام</a>.</p>
   <p><a href="index.html" class="btn outline mt-8">العودة للرئيسية</a></p>
-  <script>
+  <script type="module">
+    import { BACKEND_URL } from './assets/js/config.js';
+
     const p = new URLSearchParams(location.search);
     const email = p.get('email');
     const udid = p.get('udid');
@@ -30,11 +32,14 @@
     document.getElementById('udid').textContent = udid ? udid : 'غير متوفر';
     const reasonParam = p.get('reason');
     if (reasonParam) {
-      // Temporary debug output for failure reason
-      const pre = document.createElement('pre');
-      pre.textContent = decodeURIComponent(reasonParam);
-      pre.style.whiteSpace = 'pre-wrap';
-      document.body.appendChild(pre);
+      const msg = document.createElement('p');
+      msg.textContent = 'حدث خلل غير متوقع وتم تسجيله للمراجعة.';
+      document.body.appendChild(msg);
+      fetch(`${BACKEND_URL}/log-failure`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, udid, reason: decodeURIComponent(reasonParam) }),
+      }).catch(() => {});
     }
   </script>
 </body>
