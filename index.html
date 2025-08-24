@@ -45,7 +45,10 @@
       <label for="email">البريد الإلكتروني</label>
       <input class="input" type="email" id="email" required>
       <label for="udid">رقم UDID</label>
-      <input class="input" type="text" id="udid" required>
+      <input class="input" type="text" id="udid" name="udid" required
+        inputmode="latin" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr"
+        placeholder="مثال: 00008101XXXXXXXXXXXXXXXXXXXXXXX0000"
+        pattern="[A-Fa-f0-9]{24,40}">
       <label for="token">الرمز</label>
       <input class="input" type="text" id="token" required>
       <label for="method">طريقة الدفع</label>
@@ -53,7 +56,33 @@
         <option value="card">بطاقة</option>
         <option value="apple">Apple</option>
       </select>
-      <button type="submit" class="btn mt-12">ادفع الآن</button>
+      <script>
+      function normalizeUDID(val){
+        // احذف أي شيء غير سداسي عشري
+        return (val || '').replace(/[^a-fA-F0-9]/g,'').toUpperCase();
+      }
+
+      function isValidUDID(val){
+        const v = normalizeUDID(val);
+        // اقبل 24 إلى 40 حرفًا سداسيًا
+        return /^[A-F0-9]{24,40}$/.test(v);
+      }
+
+      document.getElementById('pay-btn')?.addEventListener('click', function(e){
+        const input = document.getElementById('udid');
+        const cleaned = normalizeUDID(input.value);
+        input.value = cleaned; // خزّن المنظّف
+
+        if(!isValidUDID(cleaned)){
+          e.preventDefault();
+          alert('رقم UDID غير صالح — استخدم حروف/أرقام إنجليزية فقط، بدون مسافات، بطول 24–40.');
+          input.focus();
+          return false;
+        }
+        // أكمل الدفع هنا...
+      });
+      </script>
+      <button type="submit" class="btn mt-12" id="pay-btn">ادفع الآن</button>
     </form>
   </section>
 
