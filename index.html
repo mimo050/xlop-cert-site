@@ -43,19 +43,20 @@
     <h2>شراء سريع</h2>
     <form id="quick-form" dir="rtl">
       <label for="email">البريد الإلكتروني</label>
-      <input class="input" type="email" id="email" required>
+      <input class="input" type="email" id="email" name="email" required>
       <label for="udid">رقم UDID</label>
       <input class="input" type="text" id="udid" name="udid" required
         inputmode="latin" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr"
         placeholder="مثال: 00008101XXXXXXXXXXXXXXXXXXXXXXX0000"
         pattern="[A-Fa-f0-9]{24,40}">
       <label for="token">الرمز</label>
-      <input class="input" type="text" id="token" required>
+      <input class="input" type="text" id="token" name="token" required>
       <label for="method">طريقة الدفع</label>
-      <select class="input" id="method">
+      <select class="input" id="method" name="method">
         <option value="card">بطاقة</option>
         <option value="apple">Apple</option>
       </select>
+      <input type="hidden" id="amount" name="amount" value="59">
       <script>
       function normalizeUDID(val){
         // احذف أي شيء غير سداسي عشري

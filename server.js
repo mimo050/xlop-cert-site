@@ -84,22 +84,43 @@ function computeAmountCents(amount) {
   return Math.round(num * 100);
 }
 
+function appendQuery(base, params) {
+  const url = new URL(base);
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined) url.searchParams.set(k, v);
+  });
+  return url.toString();
+}
+
 async function pay(req, res, integrationId) {
   try {
     const amountCents = computeAmountCents(req.query.amount);
     const token = await getAuthToken();
     const orderId = await createOrder(token, amountCents, req.query.order);
     const paymentToken = await getPaymentKey(token, amountCents, orderId, integrationId, { email: req.query.email });
-    const iframe = `${PAYMOB_BASE}/acceptance/iframes/${PAYMOB_IFRAME_ID}?payment_token=${paymentToken}`;
+    const extra = new URLSearchParams();
+    ['email', 'udid', 'token'].forEach(k => {
+      if (req.query[k]) extra.set(k, req.query[k]);
+    });
+    const iframe = `${PAYMOB_BASE}/acceptance/iframes/${PAYMOB_IFRAME_ID}?payment_token=${paymentToken}${extra.toString() ? `&${extra}` : ''}`;
     res.redirect(iframe);
   } catch (err) {
-    const reason = encodeURIComponent(err.response?.data?.message || err.message);
-    res.redirect(`${FAIL_URL}?reason=${reason}`);
+    const reason = err.response?.data?.message || err.message;
+    res.redirect(appendQuery(FAIL_URL, { ...req.query, reason }));
   }
 }
 
 app.get('/pay/card', (req, res) => pay(req, res, PAYMOB_CARD_INTEGRATION_ID));
 app.get('/pay/apple', (req, res) => pay(req, res, PAYMOB_APPLE_INTEGRATION_ID));
+
+function forward(url) {
+  return (req, res) => {
+    res.redirect(appendQuery(url, req.query));
+  };
+}
+
+app.get('/pay/success', forward(SUCCESS_URL));
+app.get('/pay/fail', forward(FAIL_URL));
 
 app.post('/webhook', (req, res) => {
   console.log('Webhook received', req.body);
