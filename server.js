@@ -60,6 +60,43 @@ app.post('/paymob/create', async (req, res) => {
   }
 });
 
+function flatten(obj, result = {}) {
+  Object.keys(obj).forEach((key) => {
+    const value = obj[key];
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      flatten(value, result);
+    } else {
+      result[key] = value;
+    }
+  });
+  return result;
+}
+
+app.post('/paymob/webhook', (req, res) => {
+  const hmac = req.body.hmac || req.get('hmac');
+  const fields = flatten({ ...req.body });
+  delete fields.hmac;
+  const sorted = Object.keys(fields)
+    .sort()
+    .map((k) => fields[k])
+    .join('');
+  const expectedHmac = crypto
+    .createHmac('sha512', process.env.PAYMOB_HMAC_SECRET)
+    .update(sorted)
+    .digest('hex');
+
+  if (expectedHmac === hmac) {
+    const success = req.body.obj?.success;
+    console.log(
+      `Paymob webhook ${success ? 'success' : 'failure'}`,
+      req.body.obj
+    );
+    return res.sendStatus(200);
+  }
+
+  return res.sendStatus(401);
+});
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
