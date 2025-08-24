@@ -97,6 +97,10 @@ app.post('/paymob/webhook', (req, res) => {
   return res.sendStatus(401);
 });
 
+app.get('/health', (req, res) => {
+  res.send('ok');
+});
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
