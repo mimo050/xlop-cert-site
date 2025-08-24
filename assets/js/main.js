@@ -1,4 +1,4 @@
-import { BACKEND_URL, PAY_LINK_CARD, PAY_LINK_APPLE } from './config.js';
+import { BACKEND_URL } from './config.js';
 
 (function(){
   // Set backend link for UDID profile
@@ -78,8 +78,7 @@ import { BACKEND_URL, PAY_LINK_CARD, PAY_LINK_APPLE } from './config.js';
       localStorage.setItem('udid', udidVal);
       localStorage.setItem('token', tokenVal);
       localStorage.setItem('method', methodVal);
-      const action=methodVal==='apple'?PAY_LINK_APPLE:PAY_LINK_CARD;
-      form.action=action;
+      // form.action will rely on static HTML configuration
     });
   }
 })();
