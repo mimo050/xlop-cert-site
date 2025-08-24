@@ -1,4 +1,10 @@
+import { BACKEND_URL } from './config.js';
+
 (function(){
+  // Set backend link for UDID profile
+  const udidLink=document.querySelector('#get-udid');
+  if(udidLink){ udidLink.href=`${BACKEND_URL}/profile.php`; }
+
   // Auto-fill UDID from query
   const p=new URLSearchParams(location.search);
   const udid=p.get('udid');
