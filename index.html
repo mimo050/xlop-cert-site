@@ -22,7 +22,7 @@
     </div>
     <div>
       <a href="#pricing">الأسعار</a>
-      <a href="#quick-form">شراء الشهادة</a>
+      <a href="#payForm">شراء الشهادة</a>
       <a href="faq.html">الأسئلة الشائعة</a>
     </div>
   </nav>
@@ -33,7 +33,7 @@
     <p>اضغط زر <strong>الحصول على UDID</strong> لتنزيل ملف تعريف مؤقت، ثبّته من الإعدادات، وبنرجّعك للصفحة ورقم جهازك جاهز تلقائيًا.</p>
     <div class="actions">
       <a class="btn" id="get-udid" href="#">الحصول على UDID</a>
-      <a class="btn outline" href="#quick-form">شراء الشهادة</a>
+      <a class="btn outline" href="#payForm">شراء الشهادة</a>
     </div>
     <p class="note">يُفضل فتح الموقع عبر Safari على iPhone.</p>
     <p id="udidStatus" class="note hidden"></p>
@@ -41,49 +41,13 @@
 
   <section class="section container">
     <h2>شراء سريع</h2>
-    <form id="quick-form" dir="rtl">
-      <label for="email">البريد الإلكتروني</label>
-      <input class="input" type="email" id="email" name="email" required>
-      <label for="udid">رقم UDID</label>
-      <input class="input" type="text" id="udid" name="udid" required
-        inputmode="latin" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr"
-        placeholder="مثال: 00008101XXXXXXXXXXXXXXXXXXXXXXX0000"
-        pattern="[A-Fa-f0-9]{24,40}">
-      <label for="token">الرمز</label>
-      <input class="input" type="text" id="token" name="token" required>
-      <label for="method">طريقة الدفع</label>
-      <select class="input" id="method" name="method">
-        <option value="card">بطاقة</option>
-        <option value="apple">Apple</option>
-      </select>
-      <input type="hidden" id="amount" name="amount" value="59">
-      <script>
-      function normalizeUDID(val){
-        // احذف أي شيء غير سداسي عشري
-        return (val || '').replace(/[^a-fA-F0-9]/g,'').toUpperCase();
-      }
-
-      function isValidUDID(val){
-        const v = normalizeUDID(val);
-        // اقبل 24 إلى 40 حرفًا سداسيًا
-        return /^[A-F0-9]{24,40}$/.test(v);
-      }
-
-      document.getElementById('pay-btn')?.addEventListener('click', function(e){
-        const input = document.getElementById('udid');
-        const cleaned = normalizeUDID(input.value);
-        input.value = cleaned; // خزّن المنظّف
-
-        if(!isValidUDID(cleaned)){
-          e.preventDefault();
-          alert('رقم UDID غير صالح — استخدم حروف/أرقام إنجليزية فقط، بدون مسافات، بطول 24–40.');
-          input.focus();
-          return false;
-        }
-        // أكمل الدفع هنا...
-      });
-      </script>
-      <button type="submit" class="btn mt-12" id="pay-btn">ادفع الآن</button>
+    <form id="payForm" action="https://xlop-cert-site.onrender.com/pay/card" method="POST">
+      <input type="hidden" name="amount" value="39"><!-- adjust as needed -->
+      <input type="email" name="email" id="email" required placeholder="name@example.com">
+      <input type="text"  name="udid"  id="udid" required
+             inputmode="latin" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr"
+             pattern="[A-Fa-f0-9]{24,40}" placeholder="مثال: 00008101XXXXXXXX...">
+      <button type="submit" id="pay-btn">ادفع الآن</button>
     </form>
   </section>
 
@@ -111,19 +75,19 @@
         <h3>خطة سنة</h3>
         <div class="price">59 ر.س</div>
         <p>مناسبة للاستخدام الشخصي.</p>
-        <a class="btn" href="#quick-form">اشترِ الآن</a>
+        <a class="btn" href="#payForm">اشترِ الآن</a>
       </div>
       <div class="card">
         <h3>خطة سنتين</h3>
         <div class="price">99 ر.س</div>
         <p>قيمة أفضل على المدى الأطول.</p>
-        <a class="btn" href="#quick-form">اشترِ الآن</a>
+        <a class="btn" href="#payForm">اشترِ الآن</a>
       </div>
       <div class="card">
         <h3>خطة مطوّر</h3>
         <div class="price">139 ر.س</div>
         <p>دعم أولوية + تحديثات.</p>
-        <a class="btn" href="#quick-form">اشترِ الآن</a>
+        <a class="btn" href="#payForm">اشترِ الآن</a>
       </div>
     </div>
   </section>
