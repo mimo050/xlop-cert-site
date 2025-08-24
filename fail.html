@@ -28,6 +28,14 @@
     const udid = p.get('udid');
     document.getElementById('email').textContent = email ? email : 'غير متوفر';
     document.getElementById('udid').textContent = udid ? udid : 'غير متوفر';
+    const reasonParam = p.get('reason');
+    if (reasonParam) {
+      // Temporary debug output for failure reason
+      const pre = document.createElement('pre');
+      pre.textContent = decodeURIComponent(reasonParam);
+      pre.style.whiteSpace = 'pre-wrap';
+      document.body.appendChild(pre);
+    }
   </script>
 </body>
 </html>
