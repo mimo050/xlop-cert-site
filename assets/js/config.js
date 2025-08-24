@@ -1,5 +1,5 @@
-export const FRONT_URL = '';
-export const BACKEND_URL = '';
+export const FRONT_URL = 'https://mimo050.github.io/xlop-cert-site';
+export const BACKEND_URL = 'https://xlop-cert-site.onrender.com';
 export const PAY_LINK_CARD = '';
 export const PAY_LINK_APPLE = '';
 export const GBOX_BASE = '';
