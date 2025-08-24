@@ -132,7 +132,8 @@ async function pay(req, res, integrationId) {
     res.redirect(iframe);
   } catch (err) {
     console.error('Payment failed:', err.response?.data || err.message);
-    res.redirect(appendQuery(FAIL_URL, { ...req.body, reason: 'payment_failed' }));
+    const { email, udid } = req.body;
+    res.redirect(appendQuery(FAIL_URL, { email, udid, reason: 'payment_failed' }));
   }
 }
 
