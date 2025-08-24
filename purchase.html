@@ -3,31 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>جارٍ تحويلك…</title>
-  <meta name="description" content="تحويل آمن إلى بوابة الدفع لشهادات Xlop.">
+  <title>الشراء غير متاح</title>
+  <meta name="description" content="هذه الصفحة لم تعد مستخدمة." >
   <link rel="icon" href="favicon.svg">
-  <meta property="og:title" content="جارٍ تحويلك…">
-  <meta property="og:description" content="تحويل آمن إلى بوابة الدفع لشهادات Xlop.">
+    <meta property="og:title" content="الشراء غير متاح">
+    <meta property="og:description" content="هذه الصفحة لم تعد مستخدمة.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="favicon.svg">
   <meta name="theme-color" content="#0b0b0c">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="page">
-  <h1>جارٍ تحويلك إلى بوابة الدفع…</h1>
-  <script type="module">
-    import { PAY_LINK_CARD, PAY_LINK_APPLE } from './assets/js/config.js';
-    const p = new URLSearchParams(location.search);
-    const email = p.get('email');
-    const udid = p.get('udid');
-    const token = p.get('token');
-    const method = p.get('method');
-    if(token){ localStorage.setItem('token', token); }
-    const base = method === 'apple' ? PAY_LINK_APPLE : PAY_LINK_CARD;
-    const url = new URL(base);
-    if(email) url.searchParams.set('email', email);
-    if(udid) url.searchParams.set('udid', udid);
-    location.replace(url);
-  </script>
+  <h1>تم تحديث آلية الشراء</h1>
+  <p>يرجى العودة إلى <a href="index.html#quick-form">النموذج الرئيسي</a> لإكمال العملية.</p>
 </body>
 </html>
