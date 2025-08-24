@@ -34,15 +34,25 @@ $txnId = $data['id'] ?? ($data['obj']['id'] ?? uniqid('txn_'));
 
 // Store the transaction state in JSON file
 $storeFile = __DIR__ . '/paymob_transactions.json';
-$transactions = [];
-if (file_exists($storeFile)) {
-    $transactions = json_decode(file_get_contents($storeFile), true) ?: [];
+$fp = fopen($storeFile, 'c+');
+if ($fp) {
+    flock($fp, LOCK_EX);
+    $contents = stream_get_contents($fp);
+    $transactions = $contents ? json_decode($contents, true) : [];
+    if (!is_array($transactions)) {
+        $transactions = [];
+    }
+    $transactions[$txnId] = [
+        'timestamp' => time(),
+        'payload'   => $data,
+    ];
+    rewind($fp);
+    ftruncate($fp, 0);
+    fwrite($fp, json_encode($transactions, JSON_PRETTY_PRINT));
+    fflush($fp);
+    flock($fp, LOCK_UN);
+    fclose($fp);
 }
-$transactions[$txnId] = [
-    'timestamp' => time(),
-    'payload'   => $data,
-];
-file_put_contents($storeFile, json_encode($transactions, JSON_PRETTY_PRINT));
 
 // The stored state can later be consulted to redirect users after payment activation.
 
