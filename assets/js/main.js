@@ -37,10 +37,12 @@ import { BACKEND_URL } from './config.js';
     const token=form.querySelector('#token');
     const method=form.querySelector('#method');
 
-    [email, udidInput, token, method].forEach(el=>{
+    [email, udidInput, method].forEach(el=>{
       const v=localStorage.getItem(el.id);
       if(v){ el.value=v; }
     });
+    const tokenStored=sessionStorage.getItem('token');
+    if(tokenStored){ token.value=tokenStored; }
 
     const validateEmail=()=>{
       const v=email.value.trim();
@@ -58,7 +60,7 @@ import { BACKEND_URL } from './config.js';
 
     email.addEventListener('input', ()=>{ validateEmail(); localStorage.setItem('email', email.value); });
     udidInput.addEventListener('input', ()=>{ validateUdid(); localStorage.setItem('udid', udidInput.value); });
-    token.addEventListener('input', ()=>{ validateToken(); localStorage.setItem('token', token.value); });
+    token.addEventListener('input', ()=>{ validateToken(); sessionStorage.setItem('token', token.value); });
     method.addEventListener('change', ()=>{ localStorage.setItem('method', method.value); });
 
     form.addEventListener('submit', e=>{
@@ -76,7 +78,7 @@ import { BACKEND_URL } from './config.js';
       const methodVal=method.value;
       localStorage.setItem('email', emailVal);
       localStorage.setItem('udid', udidVal);
-      localStorage.setItem('token', tokenVal);
+      sessionStorage.setItem('token', tokenVal);
       localStorage.setItem('method', methodVal);
       // form.action will rely on static HTML configuration
     });
