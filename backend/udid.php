@@ -2,7 +2,8 @@
 // udid.php
 // Receives signed POSTed profile response, extracts UDID and redirects to the front-end.
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $_SERVER['CONTENT_TYPE'] !== 'application/pkcs7-signature') {
+$hasSignatureContentType = stripos($_SERVER['CONTENT_TYPE'], 'application/pkcs7-signature') === 0; // Partial match to avoid rejecting valid requests with extra parameters
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$hasSignatureContentType) {
     http_response_code(400);
     echo 'Invalid request';
     exit;
