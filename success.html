@@ -1,13 +1,22 @@
 <!doctype html><html lang="ar"><meta charset="utf-8">
 <title>تم — Xlop</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<body style="font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:680px;margin:40px auto;padding:0 16px;line-height:1.7">
-  <h1>تم استقبال البيانات ✅</h1>
+<body style="font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:680px;margin:40px auto;padding:0 16px;line-height:1.7;text-align:center">
+  <h1>تم الدفع بنجاح ✅</h1>
   <p>إن وجد <code>UDID</code> سيتم عرضه بالأسفل.</p>
   <div id="udid" style="padding:12px 16px;border:1px solid #ddd;border-radius:8px"></div>
+  <p><a id="install" href="#" style="display:none;margin-top:24px;padding:12px 18px;border-radius:10px;background:#000;color:#fff;text-decoration:none;font-weight:600">متابعة التثبيت</a></p>
   <script>
     const p = new URLSearchParams(location.search);
-    const u = p.get('udid');
-    document.getElementById('udid').textContent = u ? u : 'لا يوجد UDID في الرابط.';
+    const email = p.get('email');
+    const udid = p.get('udid');
+    const token = p.get('token') || localStorage.getItem('token');
+    document.getElementById('udid').textContent = udid ? udid : 'لا يوجد UDID في الرابط.';
+    if (email && udid && token) {
+      const params = new URLSearchParams({ email, udid, token });
+      const btn = document.getElementById('install');
+      btn.href = `install.html?${params.toString()}`;
+      btn.style.display = 'inline-block';
+    }
   </script>
 </body></html>
