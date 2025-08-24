@@ -34,6 +34,24 @@
   </header>
 
   <section class="section container">
+    <h2>شراء سريع</h2>
+    <form id="quick-form" dir="rtl" style="max-width:400px;margin:auto">
+      <label for="email">البريد الإلكتروني</label>
+      <input class="input" type="email" id="email" required>
+      <label for="udid">UDID</label>
+      <input class="input" type="text" id="udid" required>
+      <label for="token">Token</label>
+      <input class="input" type="text" id="token" required>
+      <label for="method">طريقة الدفع</label>
+      <select class="input" id="method">
+        <option value="card">بطاقة</option>
+        <option value="apple">Apple</option>
+      </select>
+      <button type="submit" class="btn" style="margin-top:12px">ادفع الآن</button>
+    </form>
+  </section>
+
+  <section class="section container">
     <div class="grid">
       <div class="card">
         <h3>1) احصل على UDID</h3>
