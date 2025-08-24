@@ -1,105 +1,112 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
+const morgan = require('morgan');
 const crypto = require('crypto');
+
+const {
+  PAYMOB_BASE,
+  PAYMOB_API_KEY,
+  PAYMOB_IFRAME_ID,
+  PAYMOB_CARD_INTEGRATION_ID,
+  PAYMOB_APPLE_INTEGRATION_ID,
+  SUCCESS_URL,
+  FAIL_URL,
+} = process.env;
 
 const app = express();
 app.use(express.json());
+app.use(morgan('dev'));
 
-app.post('/paymob/create', async (req, res) => {
-  const { email, udid, method } = req.body;
-  try {
-    const auth = await axios.post('https://accept.paymob.com/api/auth/tokens', {
-      api_key: process.env.PAYMOB_API_KEY
-    });
-    const authToken = auth.data.token;
-
-    const order = await axios.post('https://accept.paymob.com/api/ecommerce/orders', {
-      auth_token: authToken,
-      delivery_needed: false,
-      amount_cents: process.env.AMOUNT_CENTS,
-      currency: process.env.CURRENCY,
-      merchant_order_id: udid || crypto.randomUUID(),
-      items: []
-    });
-    const orderId = order.data.id;
-
-    const integrationId = method === 'applepay'
-      ? process.env.PAYMOB_APPLEPAY_INTEGRATION_ID
-      : process.env.PAYMOB_CARD_INTEGRATION_ID;
-
-    const payment = await axios.post('https://accept.paymob.com/api/acceptance/payment_keys', {
-      auth_token: authToken,
-      amount_cents: process.env.AMOUNT_CENTS,
-      expiration: 3600,
-      order_id: orderId,
-      billing_data: {
-        email,
-        first_name: 'NA',
-        last_name: 'NA',
-        phone_number: 'NA',
-        country: 'NA',
-        city: 'NA',
-        street: 'NA',
-        building: 'NA',
-        floor: 'NA',
-        apartment: 'NA',
-        postal_code: 'NA',
-        state: 'NA',
-        shipping_method: 'NA'
-      },
-      currency: process.env.CURRENCY,
-      integration_id: integrationId
-    });
-    const paymentKey = payment.data.token;
-
-    const iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/${process.env.PAYMOB_IFRAME_ID}?payment_token=${paymentKey}`;
-    res.json({ iframeUrl });
-  } catch (err) {
-    console.error(err.response ? err.response.data : err.message);
-    res.status(500).json({ error: 'Failed to create payment' });
-  }
+const paymob = axios.create({
+  baseURL: PAYMOB_BASE,
+  headers: { 'Content-Type': 'application/json' },
 });
 
-function flatten(obj, result = {}) {
-  Object.keys(obj).forEach((key) => {
-    const value = obj[key];
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
-      flatten(value, result);
-    } else {
-      result[key] = value;
-    }
-  });
-  return result;
+async function getAuthToken() {
+  const { data } = await paymob.post('/auth/tokens', { api_key: PAYMOB_API_KEY });
+  return data.token;
 }
 
-app.post('/paymob/webhook', (req, res) => {
-  const hmac = req.body.hmac || req.get('hmac');
-  const fields = flatten({ ...req.body });
-  delete fields.hmac;
-  const sorted = Object.keys(fields)
-    .sort()
-    .map((k) => fields[k])
-    .join('');
-  const expectedHmac = crypto
-    .createHmac('sha512', process.env.PAYMOB_HMAC_SECRET)
-    .update(sorted)
-    .digest('hex');
+async function createOrder(token, amountCents, merchantOrderId) {
+  const { data } = await paymob.post(
+    '/ecommerce/orders',
+    {
+      delivery_needed: false,
+      amount_cents: amountCents,
+      currency: 'EGP',
+      merchant_order_id: merchantOrderId || crypto.randomUUID(),
+      items: [],
+    },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return data.id;
+}
 
-  if (expectedHmac === hmac) {
-    const success = req.body.obj?.success;
-    console.log(
-      `Paymob webhook ${success ? 'success' : 'failure'}`,
-      req.body.obj
-    );
-    return res.sendStatus(200);
+function fillBilling(data = {}) {
+  return {
+    first_name: 'NA',
+    last_name: 'NA',
+    email: 'NA',
+    phone_number: 'NA',
+    street: 'NA',
+    building: 'NA',
+    floor: 'NA',
+    apartment: 'NA',
+    city: 'NA',
+    state: 'NA',
+    country: 'NA',
+    postal_code: 'NA',
+    shipping_method: 'NA',
+    ...data,
+  };
+}
+
+async function getPaymentKey(token, amountCents, orderId, integrationId, billingData) {
+  const { data } = await paymob.post(
+    '/acceptance/payment_keys',
+    {
+      amount_cents: amountCents,
+      expiration: 3600,
+      order_id: orderId,
+      currency: 'EGP',
+      integration_id: integrationId,
+      billing_data: fillBilling(billingData),
+    },
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  return data.token;
+}
+
+function computeAmountCents(amount) {
+  const num = Number(amount);
+  if (!num || isNaN(num)) throw new Error('Invalid amount');
+  return Math.round(num * 100);
+}
+
+async function pay(req, res, integrationId) {
+  try {
+    const amountCents = computeAmountCents(req.query.amount);
+    const token = await getAuthToken();
+    const orderId = await createOrder(token, amountCents, req.query.order);
+    const paymentToken = await getPaymentKey(token, amountCents, orderId, integrationId, { email: req.query.email });
+    const iframe = `${PAYMOB_BASE}/acceptance/iframes/${PAYMOB_IFRAME_ID}?payment_token=${paymentToken}`;
+    res.redirect(iframe);
+  } catch (err) {
+    const reason = encodeURIComponent(err.response?.data?.message || err.message);
+    res.redirect(`${FAIL_URL}?reason=${reason}`);
   }
+}
 
-  return res.sendStatus(401);
+app.get('/pay/card', (req, res) => pay(req, res, PAYMOB_CARD_INTEGRATION_ID));
+app.get('/pay/apple', (req, res) => pay(req, res, PAYMOB_APPLE_INTEGRATION_ID));
+
+app.post('/webhook', (req, res) => {
+  console.log('Webhook received', req.body);
+  res.sendStatus(200);
 });
 
-app.get('/health', (req, res) => {
-  res.send('ok');
-});
+app.get('/health', (_req, res) => res.send('ok'));
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
