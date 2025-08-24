@@ -27,4 +27,53 @@ import { BACKEND_URL } from './config.js';
       if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
     });
   });
+
+  // Quick purchase form
+  const form=document.getElementById('quick-form');
+  if(form){
+    const email=form.querySelector('#email');
+    const udidInput=form.querySelector('#udid');
+    const token=form.querySelector('#token');
+    const method=form.querySelector('#method');
+
+    [email, udidInput, token, method].forEach(el=>{
+      const v=localStorage.getItem(el.id);
+      if(v){ el.value=v; }
+    });
+
+    const validateEmail=()=>{
+      const v=email.value.trim();
+      email.setCustomValidity(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?'':'البريد غير صحيح');
+    };
+    const validateUdid=()=>{
+      const v=udidInput.value.trim();
+      udidInput.setCustomValidity(v.startsWith('000') && v.length===40 ? '' : 'UDID غير صالح');
+    };
+    const validateToken=()=>{
+      const v=token.value.trim();
+      token.setCustomValidity(v ? '' : 'الرمز مطلوب');
+    };
+
+    email.addEventListener('input', ()=>{ validateEmail(); localStorage.setItem('email', email.value); });
+    udidInput.addEventListener('input', ()=>{ validateUdid(); localStorage.setItem('udid', udidInput.value); });
+    token.addEventListener('input', ()=>{ validateToken(); localStorage.setItem('token', token.value); });
+    method.addEventListener('change', ()=>{ localStorage.setItem('method', method.value); });
+
+    form.addEventListener('submit', e=>{
+      e.preventDefault();
+      validateEmail();
+      validateUdid();
+      validateToken();
+      if(form.checkValidity()){
+        const params=new URLSearchParams({email:email.value.trim(), udid:udidInput.value.trim(), token:token.value.trim(), method:method.value});
+        localStorage.setItem('email', email.value);
+        localStorage.setItem('udid', udidInput.value);
+        localStorage.setItem('token', token.value);
+        localStorage.setItem('method', method.value);
+        location.href=`purchase.html?${params.toString()}`;
+      }else{
+        form.reportValidity();
+      }
+    });
+  }
 })();
