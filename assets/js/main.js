@@ -1,4 +1,4 @@
-import { BACKEND_URL } from './config.js';
+import { BACKEND_URL, PAY_LINK_CARD, PAY_LINK_APPLE } from './config.js';
 
 (function(){
   // Set backend link for UDID profile
@@ -61,64 +61,25 @@ import { BACKEND_URL } from './config.js';
     token.addEventListener('input', ()=>{ validateToken(); localStorage.setItem('token', token.value); });
     method.addEventListener('change', ()=>{ localStorage.setItem('method', method.value); });
 
-    form.addEventListener('submit', async e=>{
-      e.preventDefault();
+    form.addEventListener('submit', e=>{
       validateEmail();
       validateUdid();
       validateToken();
-      if(form.checkValidity()){
-        const emailVal=email.value.trim();
-        const udidVal=udidInput.value.trim();
-        const methodVal=method.value;
-        localStorage.setItem('email', emailVal);
-        localStorage.setItem('udid', udidVal);
-        localStorage.setItem('token', token.value);
-        localStorage.setItem('method', methodVal);
-        try{
-          const res=await fetch(`${BACKEND_URL}/paymob/create`,{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({email:emailVal, udid:udidVal, method:methodVal})
-          });
-          const data=await res.json();
-          if(data.iframeUrl){
-            const overlay=document.createElement('div');
-            overlay.style.position='fixed';
-            overlay.style.inset='0';
-            overlay.style.background='rgba(0,0,0,0.8)';
-            overlay.style.display='flex';
-            overlay.style.alignItems='center';
-            overlay.style.justifyContent='center';
-            const box=document.createElement('div');
-            box.style.width='100%';
-            box.style.maxWidth='480px';
-            box.style.background='#fff';
-            box.style.borderRadius='8px';
-            box.style.padding='16px';
-            const iframe=document.createElement('iframe');
-            iframe.src=data.iframeUrl;
-            iframe.style.width='100%';
-            iframe.style.height='400px';
-            iframe.style.border='0';
-            const btn=document.createElement('button');
-            btn.textContent='إكمال الطلب';
-            btn.className='btn mt-12';
-            btn.addEventListener('click',()=>{
-              location.href=`success.html?email=${encodeURIComponent(emailVal)}&udid=${encodeURIComponent(udidVal)}`;
-            });
-            box.appendChild(iframe);
-            box.appendChild(btn);
-            overlay.appendChild(box);
-            document.body.appendChild(overlay);
-          }else{
-            location.href=`fail.html?email=${encodeURIComponent(emailVal)}&udid=${encodeURIComponent(udidVal)}`;
-          }
-        }catch(err){
-          location.href=`fail.html?email=${encodeURIComponent(emailVal)}&udid=${encodeURIComponent(udidVal)}`;
-        }
-      }else{
+      if(!form.checkValidity()){
+        e.preventDefault();
         form.reportValidity();
+        return;
       }
+      const emailVal=email.value.trim();
+      const udidVal=udidInput.value.trim();
+      const tokenVal=token.value.trim();
+      const methodVal=method.value;
+      localStorage.setItem('email', emailVal);
+      localStorage.setItem('udid', udidVal);
+      localStorage.setItem('token', tokenVal);
+      localStorage.setItem('method', methodVal);
+      const action=methodVal==='apple'?PAY_LINK_APPLE:PAY_LINK_CARD;
+      form.action=action;
     });
   }
 })();
