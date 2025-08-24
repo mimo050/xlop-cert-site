@@ -16,7 +16,8 @@ import { BACKEND_URL } from './config.js';
     const got=document.querySelector('#udidStatus');
     if(got){
       got.textContent='تم جلب UDID تلقائيًا ✅';
-      got.style.display='block';
+      got.classList.remove('hidden');
+      got.classList.add('message','success');
     }
   }
   // Smooth scroll for anchors
