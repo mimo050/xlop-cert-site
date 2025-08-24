@@ -47,8 +47,9 @@ import { BACKEND_URL } from './config.js';
       email.setCustomValidity(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?'':'البريد غير صحيح');
     };
     const validateUdid=()=>{
-      const v=udidInput.value.trim();
-      udidInput.setCustomValidity(v.startsWith('000') && v.length===40 ? '' : 'رقم UDID غير صالح');
+      const v=udidInput.value.trim().replace(/[^a-fA-F0-9]/g,'').toUpperCase();
+      udidInput.value=v;
+      udidInput.setCustomValidity(/^[A-F0-9]{24,40}$/.test(v)?'' : 'رقم UDID غير صالح');
     };
     const validateToken=()=>{
       const v=token.value.trim();
