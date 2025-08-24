@@ -14,6 +14,25 @@ const {
   FAIL_URL,
 } = process.env;
 
+function ensureEnv(vars) {
+  const missing = Object.entries(vars)
+    .filter(([, v]) => !v)
+    .map(([k]) => k);
+  if (missing.length) {
+    console.error('Missing required environment variables:', missing.join(', '));
+    process.exit(1);
+  }
+}
+
+ensureEnv({
+  PAYMOB_BASE,
+  PAYMOB_API_KEY,
+  PAYMOB_IFRAME_ID,
+  PAYMOB_APPLE_INTEGRATION_ID,
+  SUCCESS_URL,
+  FAIL_URL,
+});
+
 const app = express();
 app.use(express.json());
 app.use(
