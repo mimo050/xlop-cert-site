@@ -3,9 +3,9 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// List of allowed iframe URL patterns
-const ALLOWED_IFRAME_PATTERNS = [
-  /^https:\/\/[^/]*paymob\.com\/acceptance\/iframes\//,
+// List of allowed iframe hostnames
+const ALLOWED_IFRAME_HOSTNAMES = [
+  'paymob.com', // Explicitly allow the root domain
 ];
 
 // Redirects to provided iframe URL
@@ -14,10 +14,22 @@ app.get('/pay/card', (req, res) => {
   if (!iframeUrl) {
     return res.status(400).send('Missing iframe query parameter');
   }
-  const isAllowed = ALLOWED_IFRAME_PATTERNS.some(pattern => pattern.test(iframeUrl));
+  let url;
+  try {
+    url = new URL(iframeUrl);
+  } catch (err) {
+    return res.status(400).send('Invalid iframe URL');
+  }
+
+  const hostname = url.hostname;
+  const isAllowed =
+    hostname.endsWith('.paymob.com') ||
+    ALLOWED_IFRAME_HOSTNAMES.includes(hostname);
+
   if (!isAllowed) {
     return res.status(400).send('Invalid iframe URL');
   }
+
   res.redirect(iframeUrl);
 });
 
