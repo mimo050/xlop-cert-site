@@ -1,9 +1,29 @@
 # xlop-cert-site
 
-واجهة Vercel لاستخراج UDID وربطها مع باك-إند PHP خارجي.
+واجهة ثابتة على GitHub Pages لاستخراج UDID وربطها مع باك-إند PHP خارجي.
+
+## gbox.run deep-link (placeholder)
+
+- الشكل النهائي: `https://gbox.run/deeplink?udid={UDID}&token={TOKEN}&callback={URL}`
+- المعلمات:
+  - `udid`: رقم تعريف الجهاز.
+  - `token`: رمز التحقق من الدفع.
+  - `callback`: (اختياري) رابط يعاد التوجيه إليه بعد التثبيت.
+- عند توفير `callback` سيتم إعادة التوجيه إليه مع البارامتر `status`.
+
+### مثال طلب/استجابة مستقبلية
+**الطلب:**
+`GET https://gbox.run/deeplink?udid=EXAMPLE_UDID&token=EXAMPLE_TOKEN&callback=https://example.com/return`
+
+**الاستجابة:**
+`302 Location: https://example.com/return?status=ok`
+
+### تعليمات النشر المختصرة
+- الواجهة: GitHub Pages.
+- الباك-إند: استضافة PHP خارجية.
 
 ## Backend PHP
-- الواجهة تُبقي على Vercel.
+- الواجهة تُنشر على GitHub Pages.
 - الباك-إند يُرفع على استضافة PHP (000webhost/InfinityFree…).
 - استبدل `PHP_BASE_URL` في رابط الزر بعد معرفة الرابط الفعلي.
 - التدفّق: يفتح `profile.php` → يثبّت البروفايل على iPhone → iOS يرسل POST إلى `get-udid.php` → إعادة توجيه إلى `success.html?udid=…`.
@@ -12,7 +32,7 @@
 1. أنشئ حسابًا مجانيًا في 000webhost أو InfinityFree.
 2. افتح File Manager وارفع محتويات مجلد `public/` من `backend-dist.zip` إلى `public_html`.
 3. بعد الرفع، افتح `public/config.php` على السيرفر واستبدل:
-   - `FRONT_URL` برابط مشروع الواجهة على Vercel.
+   - `FRONT_URL` برابط مشروع الواجهة على GitHub Pages.
 4. انسخ رابط الموقع الناتج كـ `PHP_BASE_URL` (مثال: `https://yourapp.000webhostapp.com`).
 5. عدّل رابط زر **Get UDID** في `index.html` باستبدال `PHP_BASE_URL` الحقيقي، ثم قم بعمل commit:
    `fix(frontend): set PHP_BASE_URL to actual backend host`.
