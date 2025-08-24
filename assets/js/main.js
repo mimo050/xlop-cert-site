@@ -15,7 +15,7 @@ import { BACKEND_URL } from './config.js';
     if(getBtn){ getBtn.style.display='none'; }
     const got=document.querySelector('#udidStatus');
     if(got){
-      got.textContent='تم جلب UDID تلقائيًا ✅';
+      got.textContent='تم جلب رقم UDID تلقائيًا ✅';
       got.classList.remove('hidden');
       got.classList.add('message','success');
     }
@@ -48,7 +48,7 @@ import { BACKEND_URL } from './config.js';
     };
     const validateUdid=()=>{
       const v=udidInput.value.trim();
-      udidInput.setCustomValidity(v.startsWith('000') && v.length===40 ? '' : 'UDID غير صالح');
+      udidInput.setCustomValidity(v.startsWith('000') && v.length===40 ? '' : 'رقم UDID غير صالح');
     };
     const validateToken=()=>{
       const v=token.value.trim();
