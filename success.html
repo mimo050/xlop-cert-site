@@ -27,7 +27,7 @@
     const p = new URLSearchParams(location.search);
     const email = p.get('email');
     const udid = p.get('udid');
-    const token = p.get('token') || localStorage.getItem('token');
+    const token = p.get('token') || sessionStorage.getItem('token');
     document.getElementById('email').textContent = email ? email : 'غير متوفر';
     document.getElementById('udid').textContent = udid ? udid : 'غير متوفر';
     if (email && udid && token) {
