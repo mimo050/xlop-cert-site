@@ -42,8 +42,10 @@ if (@$doc->loadXML($xml)) {
 }
 
 if ($udid) {
-    $frontend = 'https://xlop-cert-site.vercel.app/'; // replace with your front-end domain
-    header('Location: ' . $frontend . '?udid=' . urlencode($udid));
+    // Use FRONT_URL from environment or fall back to the public GitHub Pages URL
+    $frontend = getenv('FRONT_URL') ?: 'https://mimo050.github.io/xlop-cert-site';
+    $frontend = rtrim($frontend, '/');
+    header('Location: ' . $frontend . '/?udid=' . urlencode($udid));
     exit;
 }
 
