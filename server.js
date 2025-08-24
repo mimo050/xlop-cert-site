@@ -112,6 +112,7 @@ async function pay(req, res, integrationId) {
     res.redirect(iframe);
   } catch (err) {
     const reason = err.response?.data?.message || err.message;
+    console.error('Payment failed:', reason);
     res.redirect(appendQuery(FAIL_URL, { ...req.body, reason }));
   }
 }
@@ -126,6 +127,11 @@ function forward(url) {
 
 app.get('/pay/success', forward(SUCCESS_URL));
 app.get('/pay/fail', forward(FAIL_URL));
+
+app.post('/log-failure', (req, res) => {
+  console.error('Client failure reported:', req.body);
+  res.sendStatus(200);
+});
 
 app.post('/webhook', (req, res) => {
   console.log('Webhook received', req.body);
