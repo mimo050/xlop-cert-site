@@ -130,9 +130,8 @@ async function pay(req, res, integrationId) {
     const iframe = `${PAYMOB_BASE}/acceptance/iframes/${PAYMOB_IFRAME_ID}?payment_token=${paymentToken}${extra.toString() ? `&${extra}` : ''}`;
     res.redirect(iframe);
   } catch (err) {
-    const reason = err.response?.data?.message || err.message;
-    console.error('Payment failed:', reason);
-    res.redirect(appendQuery(FAIL_URL, { ...req.body, reason }));
+    console.error('Payment failed:', err.response?.data || err.message);
+    res.redirect(appendQuery(FAIL_URL, { ...req.body, reason: 'payment_failed' }));
   }
 }
 
