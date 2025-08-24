@@ -4,9 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Xlop Certificates</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script type="module" src="assets/js/main.js"></script>
   <meta name="description" content="شهادات توقيع iOS مع جلب UDID تلقائياً.">
+  <link rel="icon" href="assets/logo.svg">
+  <meta name="theme-color" content="#0b0b0c">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script type="module" src="assets/js/main.js"></script>
 </head>
 <body>
   <nav class="nav container">
@@ -25,17 +27,17 @@
     <div class="badge">يدعم جلب الـ UDID تلقائيًا</div>
     <h1>شهادات توقيع iOS — بسرعة وثقة</h1>
     <p>اضغط زر <strong>الحصول على UDID</strong> لتنزيل ملف تعريف مؤقت، ثبّته من الإعدادات، وبنرجّعك للصفحة ورقم جهازك جاهز تلقائيًا.</p>
-    <div style="display:flex;gap:12px;justify-content:center;margin-top:12px">
+    <div class="actions">
       <a class="btn" id="get-udid" href="#">الحصول على UDID</a>
       <a class="btn outline" href="purchase.html">شراء الشهادة</a>
     </div>
     <p class="note">يُفضل فتح الموقع عبر Safari على iPhone.</p>
-    <p id="udidStatus" class="note" style="display:none"></p>
+    <p id="udidStatus" class="note hidden"></p>
   </header>
 
   <section class="section container">
     <h2>شراء سريع</h2>
-    <form id="quick-form" dir="rtl" style="max-width:400px;margin:auto">
+    <form id="quick-form" dir="rtl">
       <label for="email">البريد الإلكتروني</label>
       <input class="input" type="email" id="email" required>
       <label for="udid">UDID</label>
@@ -47,7 +49,7 @@
         <option value="card">بطاقة</option>
         <option value="apple">Apple</option>
       </select>
-      <button type="submit" class="btn" style="margin-top:12px">ادفع الآن</button>
+      <button type="submit" class="btn mt-12">ادفع الآن</button>
     </form>
   </section>
 
