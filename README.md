@@ -46,3 +46,7 @@ curl -X POST "PHP_BASE_URL/get-udid.php" \
   --data-binary '<plist><dict><key>UDID</key><string>TEST-UDID-123</string></dict></plist>' -i
 ```
 يجب أن يرجع 302 إلى `FRONT_URL/success.html?udid=TEST-UDID-123`.
+
+## Health Check
+
+بعد نشر التطبيق يمكنك التأكد من أنه يعمل عن طريق زيارة المسار `/health`، والذي يعيد النص `ok`.
