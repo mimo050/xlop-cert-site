@@ -1,63 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شراء الشهادة</title>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        input, select {
-            width: 90%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: none;
-            font-size: 16px;
-        }
-        #paypal-button-container {
-            margin-top: 20px;
-        }
-    </style>
-    <script src="https://www.paypal.com/sdk/js?client-id=Adnx8iybU3z3fd00LBR30xdswJtPD7FJA7ZMBO5s4VnZu0sp5KLNdJDklX7ol6cLF65LtQC8c7wpT_lo&currency=SAR"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>جارٍ تحويلك…</title>
+  <style>
+    body{background:#000;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;text-align:center;padding:40px}
+  </style>
 </head>
 <body>
-
-    <h1>شراء الشهادة</h1>
-    <input type="email" id="email" placeholder="example@email.com">
-    <input type="text" id="udid" placeholder="أدخل UDID الخاص بك">
-    <select id="plan">
-        <option value="99">سنتين – 99 رس</option>
-        <option value="59">سنة – 59 رس</option>
-    </select>
-
-    <div id="paypal-button-container"></div>
-
-    <script>
-        paypal.Buttons({
-            createOrder: function(data, actions) {
-                let price = document.getElementById("plan").value;
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: {
-                            value: price,
-                            currency_code: "SAR"
-                        }
-                    }]
-                });
-            },
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    alert('تم الدفع بنجاح بواسطة: ' + details.payer.name.given_name);
-                });
-            }
-        }).render('#paypal-button-container');
-    </script>
-
+  <h1>جارٍ تحويلك إلى بوابة الدفع…</h1>
+  <script type="module">
+    import { PAY_LINK_CARD, PAY_LINK_APPLE } from './assets/js/config.js';
+    const p = new URLSearchParams(location.search);
+    const email = p.get('email');
+    const udid = p.get('udid');
+    const token = p.get('token');
+    const method = p.get('method');
+    if(token){ localStorage.setItem('token', token); }
+    const base = method === 'apple' ? PAY_LINK_APPLE : PAY_LINK_CARD;
+    const url = new URL(base);
+    if(email) url.searchParams.set('email', email);
+    if(udid) url.searchParams.set('udid', udid);
+    location.replace(url);
+  </script>
 </body>
 </html>
