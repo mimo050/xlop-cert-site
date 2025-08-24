@@ -22,7 +22,6 @@
     </div>
     <div>
       <a href="#pricing">الأسعار</a>
-      <a href="#payForm">شراء الشهادة</a>
       <a href="faq.html">الأسئلة الشائعة</a>
     </div>
   </nav>
@@ -33,23 +32,12 @@
     <p>اضغط زر <strong>الحصول على UDID</strong> لتنزيل ملف تعريف مؤقت، ثبّته من الإعدادات، وبنرجّعك للصفحة ورقم جهازك جاهز تلقائيًا.</p>
     <div class="actions">
       <a class="btn" id="get-udid" href="#">الحصول على UDID</a>
-      <a class="btn outline" href="#payForm">شراء الشهادة</a>
     </div>
     <p class="note">يُفضل فتح الموقع عبر Safari على iPhone.</p>
     <p id="udidStatus" class="note hidden"></p>
   </header>
 
-  <section class="section container">
-    <h2>شراء سريع</h2>
-    <form id="payForm" action="https://xlop-cert-site.onrender.com/pay/card" method="POST">
-      <input type="hidden" name="amount" value="39"><!-- adjust as needed -->
-      <input type="email" name="email" id="email" required placeholder="name@example.com">
-      <input type="text"  name="udid"  id="udid" required
-             inputmode="latin" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr"
-             pattern="[A-Fa-f0-9]{24,40}" placeholder="مثال: 00008101XXXXXXXX...">
-      <button type="submit" id="pay-btn">ادفع الآن</button>
-    </form>
-  </section>
+
 
   <section class="section container">
     <div class="grid">
@@ -75,19 +63,16 @@
         <h3>خطة سنة</h3>
         <div class="price">59 ر.س</div>
         <p>مناسبة للاستخدام الشخصي.</p>
-        <a class="btn" href="#payForm">اشترِ الآن</a>
       </div>
       <div class="card">
         <h3>خطة سنتين</h3>
         <div class="price">99 ر.س</div>
         <p>قيمة أفضل على المدى الأطول.</p>
-        <a class="btn" href="#payForm">اشترِ الآن</a>
       </div>
       <div class="card">
         <h3>خطة مطوّر</h3>
         <div class="price">139 ر.س</div>
         <p>دعم أولوية + تحديثات.</p>
-        <a class="btn" href="#payForm">اشترِ الآن</a>
       </div>
     </div>
   </section>
