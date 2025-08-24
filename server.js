@@ -105,7 +105,8 @@ async function getPaymentKey(token, amountCents, orderId, integrationId, billing
 
 function computeAmountCents(amount) {
   const num = Number(amount);
-  if (!num || isNaN(num)) throw new Error('Invalid amount');
+  if (isNaN(num)) throw new Error('Invalid amount');
+  if (num <= 0) throw new Error('Amount must be positive');
   return Math.round(num * 100);
 }
 
