@@ -19,6 +19,8 @@ import { BACKEND_URL } from './config.js';
       got.classList.remove('hidden');
       got.classList.add('message','success');
     }
+    const udidDisplay=document.querySelector('#udidDisplay');
+    if(udidDisplay){ udidDisplay.textContent=udid; udidDisplay.classList.remove('hidden'); }
   }
   // Smooth scroll for anchors
   document.querySelectorAll('a[href^="#"]').forEach(a=>{
