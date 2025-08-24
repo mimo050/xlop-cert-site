@@ -9,7 +9,6 @@ const {
   PAYMOB_BASE,
   PAYMOB_API_KEY,
   PAYMOB_IFRAME_ID,
-  PAYMOB_CARD_INTEGRATION_ID,
   PAYMOB_APPLE_INTEGRATION_ID,
   SUCCESS_URL,
   FAIL_URL,
@@ -117,7 +116,6 @@ async function pay(req, res, integrationId) {
   }
 }
 
-app.post('/pay/card', (req, res) => pay(req, res, PAYMOB_CARD_INTEGRATION_ID));
 app.post('/pay/apple', (req, res) => pay(req, res, PAYMOB_APPLE_INTEGRATION_ID));
 
 function forward(url) {
