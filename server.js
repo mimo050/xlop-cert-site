@@ -3,6 +3,7 @@ const express = require('express');
 const axios = require('axios');
 const morgan = require('morgan');
 const crypto = require('crypto');
+const cors = require('cors');
 
 const {
   PAYMOB_BASE,
@@ -16,6 +17,12 @@ const {
 
 const app = express();
 app.use(express.json());
+app.use(
+  cors({
+    origin: ['https://mimo050.github.io', 'https://mimo050.github.io/xlop-cert-site'],
+    methods: ['POST', 'GET'],
+  }),
+);
 app.use(morgan('dev'));
 
 const paymob = axios.create({
@@ -94,24 +101,24 @@ function appendQuery(base, params) {
 
 async function pay(req, res, integrationId) {
   try {
-    const amountCents = computeAmountCents(req.query.amount);
+    const amountCents = computeAmountCents(req.body.amount);
     const token = await getAuthToken();
-    const orderId = await createOrder(token, amountCents, req.query.order);
-    const paymentToken = await getPaymentKey(token, amountCents, orderId, integrationId, { email: req.query.email });
+    const orderId = await createOrder(token, amountCents, req.body.order);
+    const paymentToken = await getPaymentKey(token, amountCents, orderId, integrationId, { email: req.body.email });
     const extra = new URLSearchParams();
     ['email', 'udid', 'token'].forEach(k => {
-      if (req.query[k]) extra.set(k, req.query[k]);
+      if (req.body[k]) extra.set(k, req.body[k]);
     });
     const iframe = `${PAYMOB_BASE}/acceptance/iframes/${PAYMOB_IFRAME_ID}?payment_token=${paymentToken}${extra.toString() ? `&${extra}` : ''}`;
     res.redirect(iframe);
   } catch (err) {
     const reason = err.response?.data?.message || err.message;
-    res.redirect(appendQuery(FAIL_URL, { ...req.query, reason }));
+    res.redirect(appendQuery(FAIL_URL, { ...req.body, reason }));
   }
 }
 
-app.get('/pay/card', (req, res) => pay(req, res, PAYMOB_CARD_INTEGRATION_ID));
-app.get('/pay/apple', (req, res) => pay(req, res, PAYMOB_APPLE_INTEGRATION_ID));
+app.post('/pay/card', (req, res) => pay(req, res, PAYMOB_CARD_INTEGRATION_ID));
+app.post('/pay/apple', (req, res) => pay(req, res, PAYMOB_APPLE_INTEGRATION_ID));
 
 function forward(url) {
   return (req, res) => {
