@@ -1,9 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
-const morgan = require('morgan');
 const crypto = require('crypto');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const {
   PAYMOB_BASE,
@@ -34,6 +35,8 @@ ensureEnv({
 });
 
 const app = express();
+app.use(helmet());
+app.use(rateLimit({ windowMs: 60 * 1000, max: 100 }));
 app.use(express.json());
 app.use(
   cors({
@@ -41,7 +44,6 @@ app.use(
     methods: ['POST', 'GET'],
   }),
 );
-app.use(morgan('dev'));
 
 const paymob = axios.create({
   baseURL: PAYMOB_BASE,
