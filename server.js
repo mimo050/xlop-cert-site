@@ -138,9 +138,9 @@ app.get('/paymob/redirect', (req, res) => {
 });
 
 // ===== Server =====
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`Server running on ${PORT}`);
+const PORT = process.env.PORT || 3080;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
   if (!process.env.PAYMOB_API_KEY || !process.env.PAYMOB_BASE) {
     console.log('[Paymob] Env vars missing → تخطي تهيئة Paymob. السيرفر سيعمل لميزة UDID فقط.');
   }
