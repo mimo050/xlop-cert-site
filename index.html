@@ -36,6 +36,8 @@
         <button id="copy-btn" class="btn btn-secondary">نسخ الرقم</button>
       </div>
       <div id="status" class="hint"></div>
+      <button id="pay-btn" class="btn btn-primary">ادفع الآن</button>
+      <p class="hint" id="pay-hint"></p>
 
       <div class="hint" style="margin-top:16px">
         يفضّل فتح هذه الصفحة عبر <strong>Safari</strong> على iPhone. إن لم يظهر الرقم بعد التثبيت، أعد فتح الصفحة.
@@ -81,6 +83,51 @@
       if (!input.value) { status.textContent = 'لا يوجد رقم لنسخه.'; return; }
       try { await navigator.clipboard.writeText(input.value); status.textContent = 'تم نسخ الرقم ✅'; }
       catch { status.textContent = 'تعذّر النسخ — انسخه يدويًا.'; }
+    });
+  </script>
+
+  <script>
+    const payBtn = document.getElementById('pay-btn');
+    const payHint = document.getElementById('pay-hint');
+
+    // إظهار زر الدفع فقط إذا عندنا UDID
+    function togglePay() {
+      const hasUDID = !!document.getElementById('udid-input')?.value;
+      payBtn.style.display = hasUDID ? 'inline-block' : 'none';
+    }
+    togglePay();
+
+    payBtn?.addEventListener('click', async () => {
+      const udid = document.getElementById('udid-input')?.value?.trim();
+      if (!udid) { payHint.textContent = 'أدخل/اجلب الـ UDID أولاً.'; return; }
+
+      payBtn.disabled = true;
+      payHint.textContent = 'يتم إنشاء رابط الدفع…';
+
+      try {
+        const res = await fetch(`${BACKEND}/paymob/create-payment-link`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            udid,
+            amount_cents: 5900, // 59 ر.س
+            currency: 'SAR',
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || 'فشل إنشاء رابط الدفع');
+
+        const payUrl = data.redirect_url || data.iframe_url || data.url;
+        if (!payUrl) throw new Error('لم يصل رابط دفع صالح');
+
+        window.location.href = payUrl;
+      } catch (e) {
+        payHint.textContent = 'تعذّر إنشاء رابط الدفع. جرّب لاحقًا.';
+        console.error(e);
+      } finally {
+        payBtn.disabled = false;
+      }
     });
   </script>
 </body>
