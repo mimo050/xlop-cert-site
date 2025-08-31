@@ -16,6 +16,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (_, res) => res.type('text/plain').send('OK'));
+app.get('/healthz', (_req, res) => res.sendStatus(200));
 
 // ======= util: توقيع PKCS#7 (CMS) غير منفصل (nodetach) =======
 function signMobileconfigIfPossible(plistString) {
