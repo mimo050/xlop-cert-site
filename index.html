@@ -76,14 +76,14 @@
       }
 
       try {
-        const res = await fetch('/paymob/create-payment-link', {
+        const res = await fetch('https://xlop-cert-backend.onrender.com/paymob/create-payment-link', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ udid })
         });
         const data = await res.json();
-        if (data.iframe_url) {
-          window.location.href = data.iframe_url;
+        if (data.payment_url) {
+          window.location.href = data.payment_url;
         } else {
           alert('تعذّر إنشاء رابط الدفع.');
         }
@@ -93,10 +93,10 @@
       }
     }
 
-    // تنزيل بروفايل الـ UDID (اختياري)
-    document.getElementById('get-udid-btn')?.addEventListener('click', () => {
-      window.location.href = '/udid.mobileconfig';
-    });
+      // تنزيل بروفايل الـ UDID (اختياري)
+      document.getElementById('get-udid-btn')?.addEventListener('click', () => {
+        window.location.href = 'https://xlop-cert-backend.onrender.com/get-udid';
+      });
 
     // نسخ الرقم
     document.getElementById('copy-btn')?.addEventListener('click', async () => {
