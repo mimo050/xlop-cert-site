@@ -1,45 +1,22 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>تم — Xlop</title>
-  <meta name="description" content="تم الدفع بنجاح ويمكنك متابعة تثبيت الشهادة.">
-  <link rel="icon" href="favicon.svg">
-  <meta property="og:title" content="تم — Xlop">
-  <meta property="og:description" content="تم الدفع بنجاح ويمكنك متابعة تثبيت الشهادة.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="favicon.svg">
-  <meta name="theme-color" content="#0b0b0c">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>نجاح العملية</title>
+  <style>
+    :root{color-scheme:dark}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#0b0b0f;color:#eaeaf1;text-align:center}
+    .wrap{max-width:720px;margin:0 auto;padding:64px 20px}
+    h1{color:#22c55e}
+    a{display:inline-block;margin-top:20px;padding:12px 18px;border-radius:10px;background:#22c55e;color:#0b0b0f;text-decoration:none;font-weight:700}
+  </style>
 </head>
-<body class="page success-page">
-  <h1>تم الدفع بنجاح ✅</h1>
-  <p>ملخص بيانات الطلب:</p>
-  <div id="summary" class="summary">
-    <div>البريد الإلكتروني: <strong id="email">—</strong></div>
-    <div>رقم UDID: <strong id="udid">—</strong></div>
+<body>
+  <div class="wrap">
+    <h1>✅ تم الدفع بنجاح</h1>
+    <p>شكرًا لك، اكتملت العملية بنجاح.</p>
+    <a href="index.html">العودة للصفحة الرئيسية</a>
   </div>
-  <p><a id="install" class="btn hidden mt-24" href="#">متابعة التثبيت</a></p>
-  <p class="mt-24">
-    للدعم:
-    <a href="https://wa.me/9665XXXXXXX" target="_blank" rel="noopener">واتساب</a> ·
-    <a href="https://t.me/xlop_support" target="_blank" rel="noopener">تيليجرام</a>
-  </p>
-  <p><a href="index.html" class="btn outline mt-8">العودة للرئيسية</a></p>
-  <script>
-    const p = new URLSearchParams(location.search);
-    const email = p.get('email');
-    const udid = p.get('udid');
-    const token = p.get('token') || sessionStorage.getItem('token');
-    document.getElementById('email').textContent = email ? email : 'غير متوفر';
-    document.getElementById('udid').textContent = udid ? udid : 'غير متوفر';
-    if (email && udid && token) {
-      const params = new URLSearchParams({ email, udid, token });
-      const btn = document.getElementById('install');
-      btn.href = `install.html?${params.toString()}`;
-      btn.classList.remove('hidden');
-    }
-  </script>
 </body>
 </html>

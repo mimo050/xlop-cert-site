@@ -1,87 +1,87 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Xlop Certificates</title>
-  <meta name="description" content="شهادات توقيع iOS مع جلب UDID تلقائياً.">
-  <link rel="icon" href="favicon.svg">
-  <meta property="og:title" content="Xlop Certificates">
-  <meta property="og:description" content="شهادات توقيع iOS مع جلب UDID تلقائياً.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="favicon.svg">
-  <meta name="theme-color" content="#0b0b0c">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <script type="module" src="assets/js/main.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Xlop Certificates — الحصول على UDID</title>
+  <style>
+    :root { color-scheme: dark; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#0b0b0f;color:#eaeaf1}
+    .container{max-width:900px;margin:0 auto;padding:32px 20px}
+    .card{background:#12121a;border:1px solid #242436;border-radius:16px;padding:24px}
+    h1{margin:0 0 12px;font-size:28px}
+    p{margin:0 0 16px;line-height:1.8;color:#b9b9c7}
+    .row{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+    input[type="text"]{flex:1;min-width:260px;border-radius:10px;border:1px solid #2e2e43;background:#0f0f18;color:#fff;padding:12px 14px;font-size:16px}
+    .btn{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-size:16px;font-weight:600;cursor:pointer}
+    .btn-primary{background:#4f46e5;color:#fff}
+    .btn-secondary{background:#22223a;color:#fff}
+    .hint{font-size:13px;color:#9090a8;margin-top:8px}
+    .ok{color:#22c55e}
+    .err{color:#ef4444}
+    .hidden{display:none}
+    footer{opacity:.7;text-align:center;margin-top:32px;font-size:13px}
+    a{color:#a5b4fc}
+  </style>
 </head>
 <body>
-  <nav class="nav container">
-    <div class="brand">
-      <img src="favicon.svg" alt="Xlop">
-      <strong>Xlop Certificates</strong>
-    </div>
-    <div>
-      <a href="#pricing">الأسعار</a>
-      <a href="faq.html">الأسئلة الشائعة</a>
-    </div>
-  </nav>
+  <div class="container">
+    <div class="card">
+      <h1>شهادات توقيع iOS — الحصول على <span style="white-space:nowrap">UDID</span></h1>
+      <p>اضغط “الحصول على UDID” لتنزيل ملف تعريف مؤقت. بعد التثبيت ستعود تلقائيًا لهذه الصفحة ومعك رقم جهازك.</p>
 
-  <header class="hero container">
-    <div class="badge">يدعم جلب الـ UDID تلقائيًا</div>
-    <h1>شهادات توقيع iOS — بسرعة وثقة</h1>
-    <p>اضغط زر <strong>الحصول على UDID</strong> لتنزيل ملف تعريف مؤقت، ثبّته من الإعدادات، وبنرجّعك للصفحة ورقم جهازك جاهز تلقائيًا.</p>
-      <div class="actions">
-        <a class="btn" id="get-udid" href="https://xlop-cert-backend.onrender.com/udid.mobileconfig">الحصول على UDID</a>
+      <div class="row">
+        <input id="udid-input" type="text" placeholder="سيظهر الـ UDID هنا تلقائيًا بعد التثبيت" />
+        <button id="get-udid-btn" class="btn btn-primary">الحصول على UDID</button>
+        <button id="copy-btn" class="btn btn-secondary">نسخ الرقم</button>
       </div>
-      <p class="note">لفتح ملف التعريف وجلب الـ UDID تلقائيًا، استخدم Safari على iPhone.</p>
+      <div id="status" class="hint"></div>
 
-      <p id="udidStatus" class="hidden" aria-live="polite"></p>
-  </header>
-
-
-
-  <section class="section container">
-    <div class="grid">
-      <div class="card">
-        <h3>1) احصل على UDID</h3>
-        <p>ينزل ملف تعريف <kbd>.mobileconfig</kbd> من خادمنا الآمن. بعد التثبيت، يرجعك للصفحة ومعك رقم UDID.</p>
-      </div>
-      <div class="card">
-        <h3>2) ادفع بأمان</h3>
-        <p>دفع عبر PayPal (وخيارات إضافية لاحقًا). تصلك فاتورة فورية على بريدك.</p>
-      </div>
-      <div class="card">
-        <h3>3) حمل الشهادة</h3>
-        <p>بعد الدفع، نُصدر الشهادة ونرسل رابط التحميل مباشرةً.</p>
+      <div class="hint" style="margin-top:16px">
+        يفضّل فتح هذه الصفحة عبر <strong>Safari</strong> على iPhone. إن لم يظهر الرقم بعد التثبيت، أعد فتح الصفحة.
       </div>
     </div>
-  </section>
 
-  <section id="pricing" class="section container pricing">
-    <h2>الأسعار</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>خطة سنة</h3>
-        <div class="price">59 ر.س</div>
-        <p>مناسبة للاستخدام الشخصي.</p>
-      </div>
-      <div class="card">
-        <h3>خطة سنتين</h3>
-        <div class="price">99 ر.س</div>
-        <p>قيمة أفضل على المدى الأطول.</p>
-      </div>
-      <div class="card">
-        <h3>خطة مطوّر</h3>
-        <div class="price">139 ر.س</div>
-        <p>دعم أولوية + تحديثات.</p>
-      </div>
-    </div>
-  </section>
+    <footer>© Xlop Certificates</footer>
+  </div>
 
-  <footer class="footer container">
-    <div>© <span id="y"></span> Xlop — جميع الحقوق محفوظة</div>
-    <div class="note">باستخدامك للموقع، أنت توافق على سياسة الخصوصية وشروط الاستخدام.</div>
-  </footer>
-  <script>document.getElementById('y').textContent = new Date().getFullYear()</script>
+  <script>
+    // 🔧 عدّل هذا لو تغيّر نطاق الباك-إند
+    const BACKEND = 'https://xlop-cert-backend.onrender.com';
+
+    // 1) زر تنزيل ملف التعريف
+    document.getElementById('get-udid-btn')?.addEventListener('click', () => {
+      // يحمّل بروفايل: /udid.mobileconfig
+      window.location.href = BACKEND + '/udid.mobileconfig';
+    });
+
+    // 2) قراءة ?udid= أو ?udid_error= من الرابط
+    const params = new URLSearchParams(location.search);
+    const udidParam = (params.get('udid') || '').trim();
+    const hasError = params.has('udid_error');
+
+    const input = document.getElementById('udid-input');
+    const status = document.getElementById('status');
+    const copyBtn = document.getElementById('copy-btn');
+    const getBtn  = document.getElementById('get-udid-btn');
+
+    if (udidParam) {
+      input.value = udidParam.toUpperCase();
+      input.readOnly = true;
+      if (getBtn) getBtn.style.display = 'none';
+      status.innerHTML = 'تم جلب رقم UDID تلقائيًا <span class="ok">✅</span>';
+    } else if (hasError) {
+      status.innerHTML = 'تعذّر استخراج الـ UDID <span class="err">❌</span> — حاول مرة أخرى.';
+    } else {
+      status.textContent = 'اضغط “الحصول على UDID” ثم ثبّت الملف.';
+    }
+
+    // 3) نسخ الرقم
+    copyBtn?.addEventListener('click', async () => {
+      if (!input.value) { status.textContent = 'لا يوجد رقم لنسخه.'; return; }
+      try { await navigator.clipboard.writeText(input.value); status.textContent = 'تم نسخ الرقم ✅'; }
+      catch { status.textContent = 'تعذّر النسخ — انسخه يدويًا.'; }
+    });
+  </script>
 </body>
 </html>
