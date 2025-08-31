@@ -1,168 +1,107 @@
-require('dotenv').config();
-const express = require('express');
-const axios = require('axios');
-const crypto = require('crypto');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-
-const {
-  PAYMOB_BASE,
-  PAYMOB_API_KEY,
-  PAYMOB_IFRAME_ID,
-  PAYMOB_APPLE_INTEGRATION_ID,
-  SUCCESS_URL,
-  FAIL_URL,
-} = process.env;
-
-function ensureEnv(vars) {
-  const missing = Object.entries(vars)
-    .filter(([, v]) => !v)
-    .map(([k]) => k);
-  if (missing.length) {
-    console.error('Missing required environment variables:', missing.join(', '));
-    process.exit(1);
-  }
-}
-
-ensureEnv({
-  PAYMOB_BASE,
-  PAYMOB_API_KEY,
-  PAYMOB_IFRAME_ID,
-  PAYMOB_APPLE_INTEGRATION_ID,
-  SUCCESS_URL,
-  FAIL_URL,
-});
+import express from 'express';
+import { parseStringPromise } from 'xml2js';
 
 const app = express();
-app.use(helmet());
-app.use(rateLimit({ windowMs: 60 * 1000, max: 100 }));
-app.use(express.json());
-app.use(
-  cors({
-    origin: ['https://mimo050.github.io', 'https://mimo050.github.io/xlop-cert-site'],
-    methods: ['POST', 'GET'],
-  }),
-);
-
-const paymob = axios.create({
-  baseURL: PAYMOB_BASE,
-  headers: { 'Content-Type': 'application/json' },
-});
-
-async function getAuthToken() {
-  const { data } = await paymob.post('/auth/tokens', { api_key: PAYMOB_API_KEY });
-  return data.token;
-}
-
-async function createOrder(token, amountCents, merchantOrderId) {
-  const { data } = await paymob.post(
-    '/ecommerce/orders',
-    {
-      delivery_needed: false,
-      amount_cents: amountCents,
-      currency: 'EGP',
-      merchant_order_id: merchantOrderId || crypto.randomUUID(),
-      items: [],
-    },
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return data.id;
-}
-
-function fillBilling(data = {}) {
-  return {
-    first_name: 'NA',
-    last_name: 'NA',
-    email: 'NA',
-    phone_number: 'NA',
-    street: 'NA',
-    building: 'NA',
-    floor: 'NA',
-    apartment: 'NA',
-    city: 'NA',
-    state: 'NA',
-    country: 'NA',
-    postal_code: 'NA',
-    shipping_method: 'NA',
-    ...data,
-  };
-}
-
-async function getPaymentKey(token, amountCents, orderId, integrationId, billingData) {
-  const { data } = await paymob.post(
-    '/acceptance/payment_keys',
-    {
-      amount_cents: amountCents,
-      expiration: 3600,
-      order_id: orderId,
-      currency: 'EGP',
-      integration_id: integrationId,
-      billing_data: fillBilling(billingData),
-    },
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return data.token;
-}
-
-function computeAmountCents(amount) {
-  const num = Number(amount);
-  if (isNaN(num)) throw new Error('Invalid amount');
-  if (num <= 0) throw new Error('Amount must be positive');
-  return Math.round(num * 100);
-}
-
-function appendQuery(base, params) {
-  const url = new URL(base);
-  Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined) url.searchParams.set(k, v);
-  });
-  return url.toString();
-}
-
-async function pay(req, res, integrationId) {
-  try {
-    const amountCents = computeAmountCents(req.body.amount);
-    const token = await getAuthToken();
-    const orderId = await createOrder(token, amountCents, req.body.order);
-    const paymentToken = await getPaymentKey(token, amountCents, orderId, integrationId, { email: req.body.email });
-    const extra = new URLSearchParams();
-    ['email', 'udid', 'token'].forEach(k => {
-      if (req.body[k]) extra.set(k, req.body[k]);
-    });
-    const iframe = `${PAYMOB_BASE}/acceptance/iframes/${PAYMOB_IFRAME_ID}?payment_token=${paymentToken}${extra.toString() ? `&${extra}` : ''}`;
-    res.redirect(iframe);
-  } catch (err) {
-    console.error('Payment failed:', err.response?.data || err.message);
-    const { email, udid } = req.body;
-    res.redirect(appendQuery(FAIL_URL, { email, udid, reason: 'payment_failed' }));
-  }
-}
-
-app.post('/pay/apple', (req, res) => pay(req, res, PAYMOB_APPLE_INTEGRATION_ID));
-
-function forward(url) {
-  return (req, res) => {
-    res.redirect(appendQuery(url, req.query));
-  };
-}
-
-app.get('/pay/success', forward(SUCCESS_URL));
-app.get('/pay/fail', forward(FAIL_URL));
-
-app.post('/log-failure', (req, res) => {
-  console.error('Client failure reported:', req.body);
-  res.sendStatus(200);
-});
-
-app.post('/webhook', (req, res) => {
-  console.log('Webhook received', req.body);
-  res.sendStatus(200);
-});
-
-app.get('/health', (_req, res) => res.send('ok'));
-
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+// ========= إعدادات أساسية =========
+const FRONT_URL  = process.env.FRONT_URL  || 'https://mimo050.github.io/xlop-cert-site';
+const BACK_TITLE = 'Xlop Certificates';
+
+// ========= Middlewares بسيطة =========
+// نحتاج rawBody (Apple ترسل XML/Plist)
+app.use((req, res, next) => {
+  let data = '';
+  req.setEncoding('utf8');
+  req.on('data', c => data += c);
+  req.on('end', () => { req.rawBody = data; next(); });
 });
+
+// صحّة السيرفر
+app.get('/', (_, res) => res.type('text/plain').send('OK'));
+
+// ========= 1) إرسال ملف التعريف لجلب الـ UDID =========
+app.get('/udid.mobileconfig', (req, res) => {
+  const receiveUrl = `${req.protocol}://${req.get('host')}/get-udid`;
+
+  const mobileconfig = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadContent</key>
+  <dict>
+    <key>URL</key>
+    <string>${receiveUrl}</string>
+    <key>DeviceAttributes</key>
+    <array>
+      <string>UDID</string>
+      <string>IMEI</string>
+      <string>ICCID</string>
+      <string>VERSION</string>
+      <string>PRODUCT</string>
+      <string>SERIAL</string>
+    </array>
+  </dict>
+  <key>PayloadOrganization</key>
+  <string>${BACK_TITLE}</string>
+  <key>PayloadDisplayName</key>
+  <string>${BACK_TITLE} — UDID Fetch</string>
+  <key>PayloadDescription</key>
+  <string>يُستخدم هذا الملف لجلب رقم جهازك UDID وإرجاعك للموقع تلقائيًا.</string>
+  <key>PayloadIdentifier</key>
+  <string>com.xlop.udid.${Date.now()}</string>
+  <key>PayloadRemovalDisallowed</key>
+  <false/>
+  <key>PayloadType</key>
+  <string>Profile Service</string>
+  <key>PayloadUUID</key>
+  <string>${'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0, v = c==='x'?r:(r&0x3|0x8); return v.toString(16);
+  })}</string>
+  <key>PayloadVersion</key>
+  <integer>1</integer>
+</dict>
+</plist>`;
+
+  res.setHeader('Content-Type', 'application/x-apple-aspen-config');
+  res.setHeader('Content-Disposition', 'attachment; filename="Xlop-UDID.mobileconfig"');
+  res.send(mobileconfig);
+});
+
+// ========= 2) استقبال الـ UDID من iOS ثم Redirect =========
+app.post('/get-udid', async (req, res) => {
+  try {
+    const xml = req.rawBody || '';
+    const json = await parseStringPromise(xml, { explicitArray: false });
+    // استخراج مبسّط
+    let udid = '';
+    // كثير من الأجهزة ترسله داخل plist/dict/UDID أو داخل مفاتيح أخرى
+    const dict = json?.plist?.dict || {};
+    // نحاول نمسك كل القيم المتاحة كمفاتيح مباشرة
+    for (const k of Object.keys(dict)) {
+      if ((k || '').toUpperCase() === 'UDID') {
+        udid = dict[k];
+      }
+    }
+    // فشل؟ رجّع للواجهة برسالة خطأ
+    if (!udid) return res.redirect(`${FRONT_URL}/index.html?udid_error=1`);
+    // نجاح → رجّع المستخدم ومعه رقم الجهاز
+    return res.redirect(302, `${FRONT_URL}/index.html?udid=${encodeURIComponent(String(udid).toUpperCase())}`);
+  } catch (e) {
+    return res.redirect(`${FRONT_URL}/index.html?udid_error=1`);
+  }
+});
+
+// ========= 3) (اختياري) نقاط Paymob — لا تُعرقل التشغيل إن لم تتوفر =========
+const requiredPaymob = ['PAYMOB_BASE','PAYMOB_API_KEY','PAYMOB_IFRAME_ID','PAYMOB_APPLE_INTEGRATION_ID','SUCCESS_URL','FAIL_URL'];
+const hasPaymob = requiredPaymob.every(k => !!process.env[k]);
+
+if (!hasPaymob) {
+  console.warn('[Paymob] Env vars missing → تخطّي تهيئة Paymob مؤقتًا. السيرفر سيعمل لميزة UDID فقط.');
+  // يمكنك لاحقًا إضافة المسارات هنا عندما تتوفر المتغيرات
+} else {
+  // ضع هنا تكامل Paymob الحقيقي عندما تريد تفعيله
+  // مثال: app.post('/paymob/webhook', ...)
+}
+
+app.listen(PORT, () => console.log(`Server running on :${PORT}`));

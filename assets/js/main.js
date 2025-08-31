@@ -1,27 +1,18 @@
-import { BACKEND_URL } from './config.js';
-
 (function(){
-  // Set backend link for UDID profile
-  const udidLink=document.querySelector('#get-udid');
-  if(udidLink){ udidLink.href=`${BACKEND_URL}/get-udid.php`; }
+  const p = new URLSearchParams(location.search);
+  const udid = (p.get('udid') || '').toUpperCase();
 
-  // Auto-fill UDID from query
-  const p=new URLSearchParams(location.search);
-  const udid=p.get('udid');
-  if(udid){
-    const targets=[document.querySelector('#udid'), document.querySelector('#udid2')].filter(Boolean);
-    targets.forEach(i=>{ i.value=udid; i.readOnly=true; i.classList.add('filled'); });
-    const getBtn=document.querySelector('.btn[href*="get-udid"]');
-    if(getBtn){ getBtn.style.display='none'; }
-    const got=document.querySelector('#udidStatus');
-    if(got){
-      got.textContent='تم جلب رقم UDID تلقائيًا ✅';
-      got.classList.remove('hidden');
-      got.classList.add('message','success');
-    }
-    const udidDisplay=document.querySelector('#udidDisplay');
-    if(udidDisplay){ udidDisplay.textContent=udid; udidDisplay.classList.remove('hidden'); }
+  if (udid) {
+    const inputs = [document.querySelector('#udid'), document.querySelector('#udid2')].filter(Boolean);
+    inputs.forEach(i => { i.value = udid; i.readOnly = true; i.classList.add('filled'); });
+
+    const btn = document.getElementById('get-udid');
+    if (btn) btn.style.display = 'none';
+
+    const st = document.getElementById('udidStatus');
+    if (st) { st.textContent = 'تم جلب رقم UDID تلقائيًا ✅'; st.classList.remove('hidden'); }
   }
+
   // Smooth scroll for anchors
   document.querySelectorAll('a[href^="#"]').forEach(a=>{
     a.addEventListener('click', e=>{
@@ -82,7 +73,6 @@ import { BACKEND_URL } from './config.js';
       localStorage.setItem('udid', udidVal);
       sessionStorage.setItem('token', tokenVal);
       localStorage.setItem('method', methodVal);
-      // form.action will rely on static HTML configuration
     });
   }
 })();
