@@ -4,7 +4,7 @@ const BASE   = process.env.PAYMOB_BASE;                 // e.g. https://ksa.paym
 const APIKEY = process.env.PAYMOB_API_KEY;              // من Paymob
 const INTG_ID = process.env.PAYMOB_APPLE_INTEGRATION_ID; // Integration ID (apple pay - payment link)
 const SUCCESS_URL = process.env.SUCCESS_URL;            // صفحات GitHub Pages
-const FAIL_URL    = process.env.FAIL_URL;
+const FAIL_URL    = process.env.FAIL_URL;               // لم يعد مستخدمًا مباشرة هنا لكن متروك للمرجعية
 
 // 1) Auth → token
 export async function authPaymob() {
@@ -41,7 +41,13 @@ export async function createOrder(token, { amount_cents, currency, udid }) {
 }
 
 // 3) Payment key
-export async function generatePaymentKey(token, { amount_cents, currency, order_id, udid }) {
+export async function generatePaymentKey(token, {
+  amount_cents,
+  currency,
+  order_id,
+  udid,
+  redirection_url
+}) {
   const url = `${BASE}/api/acceptance/payment_keys`;
   const billing_data = {
     apartment: 'NA',
@@ -71,8 +77,8 @@ export async function generatePaymentKey(token, { amount_cents, currency, order_
       integration_id: Number(INTG_ID),
       billing_data,
       lock_order_when_paid: true,
-      // صفحات الرجوع
-      redirection_url: SUCCESS_URL, // Paymob قد يرجع حسب الإعدادات أيضاً
+      // صفحات الرجوع. نسمح بتمرير رابط إعادة التوجيه من السيرفر، مع استخدام SUCCESS_URL كافتراضي.
+      redirection_url: redirection_url || SUCCESS_URL, // Paymob قد يرجع حسب الإعدادات أيضاً
     })
   });
 

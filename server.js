@@ -92,11 +92,14 @@ app.post('/paymob/create-payment-link', async (req, res) => {
     });
 
     // 3) Generate Payment Key (Apple Pay / OnlineCard)
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const redirectUrl = `${baseUrl}/paymob/redirect`;
     const paymentToken = await generatePaymentKey(token, {
       amount_cents,
       currency,
       order_id: order.id,
-      udid
+      udid,
+      redirection_url: redirectUrl
     });
 
     // 4) Build iframe URL
@@ -118,6 +121,19 @@ app.post('/paymob/webhook', (req, res) => {
     res.sendStatus(200);
   } catch (e) {
     res.sendStatus(500);
+  }
+});
+
+// ====== PAYMOB: نتيجة الدفع وإعادة التوجيه ======
+app.get('/paymob/redirect', (req, res) => {
+  try {
+    const success = (req.query.success || '').toString().toLowerCase() === 'true';
+    const target = success ? process.env.SUCCESS_URL : process.env.FAIL_URL;
+    if (target) return res.redirect(target);
+    res.status(500).send('Redirect URLs not configured');
+  } catch (e) {
+    console.error('paymob redirect error', e);
+    res.status(500).send('Redirect error');
   }
 });
 
