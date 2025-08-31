@@ -53,7 +53,7 @@ import { BACKEND_URL } from './config.js';
     const validateUdid=()=>{
       const v=udidInput.value.trim().replace(/[^a-fA-F0-9]/g,'').toUpperCase();
       udidInput.value=v;
-      udidInput.setCustomValidity(/^[A-F0-9]{24,40}$/.test(v)?'' : 'رقم UDID غير صالح');
+      udidInput.setCustomValidity(/^[A-F0-9]{25,40}$/.test(v)?'' : 'رقم UDID يبدو غير مكتمل. جرّب من Safari على iPhone.');
     };
     const validateToken=()=>{
       const v=token.value.trim();
