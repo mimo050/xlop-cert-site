@@ -1,14 +1,12 @@
 import express from 'express';
 import { parseStringPromise } from 'xml2js';
+import forge from 'node-forge';
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-
-// ========= إعدادات أساسية =========
-const FRONT_URL  = process.env.FRONT_URL  || 'https://mimo050.github.io/xlop-cert-site';
+const FRONT_URL  = process.env.FRONT_URL || 'https://mimo050.github.io/xlop-cert-site';
 const BACK_TITLE = 'Xlop Certificates';
 
-// ========= Middlewares بسيطة =========
 // نحتاج rawBody (Apple ترسل XML/Plist)
 app.use((req, res, next) => {
   let data = '';
@@ -17,14 +15,52 @@ app.use((req, res, next) => {
   req.on('end', () => { req.rawBody = data; next(); });
 });
 
-// صحّة السيرفر
 app.get('/', (_, res) => res.type('text/plain').send('OK'));
 
-// ========= 1) إرسال ملف التعريف لجلب الـ UDID =========
+// ======= util: توقيع PKCS#7 (CMS) غير منفصل (nodetach) =======
+function signMobileconfigIfPossible(plistString) {
+  const certPem = process.env.SIGN_CERT_PEM;
+  const keyPem  = process.env.SIGN_KEY_PEM;
+  if (!certPem || !keyPem) return null;
+
+  try {
+    const cert = forge.pki.certificateFromPem(certPem);
+    const privateKey = forge.pki.privateKeyFromPem(keyPem);
+
+    const p7 = forge.pkcs7.createSignedData();
+    // المحتوى هو نص الـ plist نفسه (ليس Detached)
+    p7.content = forge.util.createBuffer(plistString, 'utf8');
+    p7.addSigner({
+      key: privateKey,
+      certificate: cert,
+      digestAlgorithm: forge.pki.oids.sha256
+    });
+    p7.addCertificate(cert);
+
+    // سلسلة شهادات إضافية؟ (اختياري)
+    if (process.env.SIGN_CHAIN_PEM) {
+      const chain = process.env.SIGN_CHAIN_PEM.split('-----END CERTIFICATE-----')
+        .filter(Boolean)
+        .map(p => (p + '-----END CERTIFICATE-----').trim());
+      for (const pem of chain) {
+        try { p7.addCertificate(forge.pki.certificateFromPem(pem)); } catch {}
+      }
+    }
+
+    p7.sign({ detached: false }); // VERY IMPORTANT: غير منفصل
+
+    const der = forge.asn1.toDer(p7.toAsn1()).getBytes();
+    return Buffer.from(der, 'binary');
+  } catch (e) {
+    console.error('[signMobileconfigIfPossible] signing error:', e.message);
+    return null;
+  }
+}
+
+// ======= تنزيل ملف التعريف (موقّع إذا أمكن) =======
 app.get('/udid.mobileconfig', (req, res) => {
   const receiveUrl = `${req.protocol}://${req.get('host')}/get-udid`;
-
-  const mobileconfig = `<?xml version="1.0" encoding="UTF-8"?>
+  const mobileconfigPlist = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -63,31 +99,49 @@ app.get('/udid.mobileconfig', (req, res) => {
 </dict>
 </plist>`;
 
-  res.setHeader('Content-Type', 'application/x-apple-aspen-config');
+  // حاول التوقيع (PKCS#7 DER). إن لم تتوفر الشهادة نرسل الـ plist خام.
+  const signed = signMobileconfigIfPossible(mobileconfigPlist);
+
   res.setHeader('Content-Disposition', 'attachment; filename="Xlop-UDID.mobileconfig"');
-  res.send(mobileconfig);
+  if (signed) {
+    // ملف موقّع DER
+    res.setHeader('Content-Type', 'application/x-apple-aspen-config');
+    return res.send(signed);
+  } else {
+    // غير موقّع (للتجربة فقط)
+    res.setHeader('Content-Type', 'application/x-apple-aspen-config; charset=utf-8');
+    return res.send(mobileconfigPlist);
+  }
 });
 
-// ========= 2) استقبال الـ UDID من iOS ثم Redirect =========
+// ======= استقبال الـ UDID والرجوع للواجهة =======
 app.post('/get-udid', async (req, res) => {
   try {
     const xml = req.rawBody || '';
-    const json = await parseStringPromise(xml, { explicitArray: false });
-    // استخراج مبسّط
     let udid = '';
-    // كثير من الأجهزة ترسله داخل plist/dict/UDID أو داخل مفاتيح أخرى
-    const dict = json?.plist?.dict || {};
-    // نحاول نمسك كل القيم المتاحة كمفاتيح مباشرة
-    for (const k of Object.keys(dict)) {
-      if ((k || '').toUpperCase() === 'UDID') {
-        udid = dict[k];
+
+    // xml2js أولاً
+    try {
+      const json = await parseStringPromise(xml, { explicitArray: true, mergeAttrs: true });
+      const dict = json?.plist?.[0]?.dict?.[0];
+      const keys = dict?.key || [];
+      const strs = dict?.string || [];
+      for (let i = 0; i < keys.length; i++) {
+        if ((keys[i] || '').toString().trim().toUpperCase() === 'UDID') {
+          udid = (strs[i] || '').toString().trim(); break;
+        }
       }
+    } catch {}
+
+    // Fallback Regex
+    if (!udid) {
+      const m = xml.match(/<key>\s*UDID\s*<\/key>\s*<string>([^<]+)<\/string>/i);
+      if (m) udid = m[1].trim();
     }
-    // فشل؟ رجّع للواجهة برسالة خطأ
+
     if (!udid) return res.redirect(`${FRONT_URL}/index.html?udid_error=1`);
-    // نجاح → رجّع المستخدم ومعه رقم الجهاز
-    return res.redirect(302, `${FRONT_URL}/index.html?udid=${encodeURIComponent(String(udid).toUpperCase())}`);
-  } catch (e) {
+    return res.redirect(302, `${FRONT_URL}/index.html?udid=${encodeURIComponent(udid.toUpperCase())}`);
+  } catch {
     return res.redirect(`${FRONT_URL}/index.html?udid_error=1`);
   }
 });
@@ -104,4 +158,4 @@ if (!hasPaymob) {
   // مثال: app.post('/paymob/webhook', ...)
 }
 
-app.listen(PORT, () => console.log(`Server running on :${PORT}`));
+app.listen(PORT, () => console.log('Server running on', PORT));
