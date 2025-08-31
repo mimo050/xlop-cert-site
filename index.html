@@ -16,6 +16,7 @@
     .btn{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-size:16px;font-weight:600;cursor:pointer}
     .btn-primary{background:#4f46e5;color:#fff}
     .btn-secondary{background:#22223a;color:#fff}
+    #payBtn{display:inline-block}
     .hint{font-size:13px;color:#9090a8;margin-top:8px}
     footer{opacity:.7;text-align:center;margin-top:32px;font-size:13px}
     a{color:#a5b4fc}
@@ -28,15 +29,18 @@
       <p>اضغط “الحصول على UDID” لتنزيل ملف تعريف مؤقت. بعد التثبيت ستعود تلقائيًا لهذه الصفحة ومعك رقم جهازك.</p>
 
       <div class="row">
-        <input id="udid-input" type="text" placeholder="سيظهر الـ UDID هنا تلقائيًا بعد التثبيت" />
+        <input id="udid" type="text" placeholder="ألصق رقم UDID هنا (يمكن لأي جهاز)" dir="ltr" autocomplete="off" />
+        <button id="payBtn" class="btn btn-primary" onclick="payNow()">ادفع الآن</button>
+      </div>
+
+      <p class="hint">
+        تقدر تلصق UDID لأي جهاز ثم تضغط «ادفع الآن». زر «الحصول على UDID» اختياري فقط لو تبغى تجيبه تلقائيًا من هذا الجهاز.
+      </p>
+
+      <div class="row" style="margin-top:12px">
         <button id="get-udid-btn" class="btn btn-primary">الحصول على UDID</button>
         <button id="copy-btn" class="btn btn-secondary">نسخ الرقم</button>
       </div>
-
-      <div class="row" style="margin-top:12px">
-        <button id="pay-btn" class="btn btn-primary">💳 ادفع الآن</button>
-      </div>
-      <p id="pay-hint" class="hint"></p>
 
       <div class="hint" style="margin-top:16px">
         يفضّل فتح هذه الصفحة عبر <strong>Safari</strong> على iPhone. إن لم يظهر الرقم بعد التثبيت، أعد فتح الصفحة.
@@ -48,69 +52,72 @@
 
   <!--  سكربتات الصفحة (ضعه قرب نهاية <body>) -->
   <script>
-    // 🔧 غيّر الدومين لو غيّرت خدمة Render
-    const BACKEND = 'https://xlop-cert-backend.onrender.com';
+    // (اختياري) تحقّق بسيط لطول الـUDID: 25 أو 40
+    function looksLikeUDID(v) {
+      const x = v.trim().toUpperCase();
+      return x.length === 25 || x.length === 40;
+    }
 
-    // تنزيل بروفايل الـ UDID
+    // زر الدفع يعمل دائمًا؛ يتحقق فقط أن في قيمة
+    async function payNow() {
+      const udidInput = document.getElementById('udid');
+      const udid = udidInput.value.trim();
+
+      if (!udid) {
+        alert('رجاءً الصق رقم UDID أولاً.');
+        udidInput.focus();
+        return;
+      }
+
+      // (اختياري) لو ودك تنبّه المستخدم لو الشكل غريب
+      if (!looksLikeUDID(udid)) {
+        const ok = confirm('الشكل لا يبدو كـ UDID قياسي. تستمر؟');
+        if (!ok) return;
+      }
+
+      try {
+        const res = await fetch('/paymob/create-payment-link', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ udid })
+        });
+        const data = await res.json();
+        if (data.iframe_url) {
+          window.location.href = data.iframe_url;
+        } else {
+          alert('تعذّر إنشاء رابط الدفع.');
+        }
+      } catch (e) {
+        alert('خطأ في الاتصال بالخادم.');
+        console.error(e);
+      }
+    }
+
+    // تنزيل بروفايل الـ UDID (اختياري)
     document.getElementById('get-udid-btn')?.addEventListener('click', () => {
-      window.location.href = BACKEND + '/udid.mobileconfig';
+      window.location.href = '/udid.mobileconfig';
+    });
+
+    // نسخ الرقم
+    document.getElementById('copy-btn')?.addEventListener('click', async () => {
+      const udid = document.getElementById('udid')?.value;
+      if (!udid) { alert('لا يوجد رقم لنسخه.'); return; }
+      try {
+        await navigator.clipboard.writeText(udid);
+        alert('تم النسخ ✅');
+      } catch {
+        alert('تعذّر النسخ—انسخ يدويًا.');
+      }
     });
 
     // قراءة ?udid= أو ?udid_error=
     const params = new URLSearchParams(location.search);
     const udidParam = (params.get('udid') || '').trim();
-    const hasError = params.has('udid_error');
-
-    const input  = document.getElementById('udid-input');
-    const status = document.getElementById('pay-hint');
-    const payBtn = document.getElementById('pay-btn');
-
-    function togglePay() {
-      const hasUDID = !!input?.value?.trim();
-      payBtn.style.display = hasUDID ? 'inline-block' : 'none';
-    }
-
     if (udidParam) {
-      input.value = udidParam.toUpperCase();
-      input.readOnly = true;
-    } else if (hasError) {
-      status.textContent = 'تعذّر استخراج الـ UDID — حاول مرة أخرى.';
+      document.getElementById('udid').value = udidParam.toUpperCase();
+    } else if (params.has('udid_error')) {
+      alert('تعذّر استخراج الـ UDID — حاول مرة أخرى.');
     }
-    togglePay();
-
-    // نسخ
-    document.getElementById('copy-btn')?.addEventListener('click', async () => {
-      if (!input.value) return (status.textContent = 'لا يوجد رقم لنسخه.');
-      try { await navigator.clipboard.writeText(input.value); status.textContent = 'تم النسخ ✅'; }
-      catch { status.textContent = 'تعذّر النسخ—انسخ يدويًا.'; }
-    });
-
-    // الدفع
-    payBtn?.addEventListener('click', async () => {
-      const udid = input?.value?.trim();
-      if (!udid) { status.textContent = 'جيب الـ UDID أولاً.'; return; }
-      payBtn.disabled = true; status.textContent = 'يتم إنشاء رابط الدفع…';
-
-      try {
-        const res = await fetch(`${BACKEND}/paymob/create-payment-link`, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ udid, amount_cents: 5900, currency: 'SAR' }) // 59 ر.س
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.message || 'فشل إنشاء رابط الدفع');
-
-        const payUrl = data.redirect_url || data.iframe_url || data.url;
-        if (!payUrl) throw new Error('لم يصل رابط دفع صالح');
-
-        location.href = payUrl;
-      } catch (e) {
-        console.error(e);
-        status.textContent = 'تعذّر إنشاء رابط الدفع. جرّب لاحقًا.';
-      } finally {
-        payBtn.disabled = false;
-      }
-    });
   </script>
 </body>
 </html>
