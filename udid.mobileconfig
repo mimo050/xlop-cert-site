@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>PayloadContent</key>
+  <dict>
+    <key>URL</key>
+    <string>https://xlop-cert-backend.onrender.com/get-udid</string>
+    <key>DeviceAttributes</key>
+    <array>
+      <string>UDID</string>
+      <string>IMEI</string>
+      <string>ICCID</string>
+      <string>VERSION</string>
+      <string>PRODUCT</string>
+      <string>SERIAL</string>
+    </array>
+  </dict>
+  <key>PayloadOrganization</key>
+  <string>Xlop Certificates</string>
+  <key>PayloadDisplayName</key>
+  <string>Xlop Certificates — UDID Fetch</string>
+  <key>PayloadDescription</key>
+  <string>يُستخدم هذا الملف لجلب رقم جهازك UDID وإرجاعك للموقع تلقائيًا.</string>
+  <key>PayloadIdentifier</key>
+  <string>com.xlop.udid</string>
+  <key>PayloadRemovalDisallowed</key>
+  <false/>
+  <key>PayloadType</key>
+  <string>Profile Service</string>
+  <key>PayloadUUID</key>
+  <string>00000000-0000-4000-8000-000000000000</string>
+  <key>PayloadVersion</key>
+  <integer>1</integer>
+</dict>
+</plist>

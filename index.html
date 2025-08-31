@@ -17,9 +17,6 @@
     .btn-primary{background:#4f46e5;color:#fff}
     .btn-secondary{background:#22223a;color:#fff}
     .hint{font-size:13px;color:#9090a8;margin-top:8px}
-    .ok{color:#22c55e}
-    .err{color:#ef4444}
-    .hidden{display:none}
     footer{opacity:.7;text-align:center;margin-top:32px;font-size:13px}
     a{color:#a5b4fc}
   </style>
@@ -35,9 +32,11 @@
         <button id="get-udid-btn" class="btn btn-primary">الحصول على UDID</button>
         <button id="copy-btn" class="btn btn-secondary">نسخ الرقم</button>
       </div>
-      <button id="pay-btn" class="btn btn-primary">💳 ادفع الآن</button>
-      <p class="hint" id="pay-hint"></p>
-      <div id="status" class="hint"></div>
+
+      <div class="row" style="margin-top:12px">
+        <button id="pay-btn" class="btn btn-primary">💳 ادفع الآن</button>
+      </div>
+      <p id="pay-hint" class="hint"></p>
 
       <div class="hint" style="margin-top:16px">
         يفضّل فتح هذه الصفحة عبر <strong>Safari</strong> على iPhone. إن لم يظهر الرقم بعد التثبيت، أعد فتح الصفحة.
@@ -47,82 +46,67 @@
     <footer>© Xlop Certificates</footer>
   </div>
 
+  <!--  سكربتات الصفحة (ضعه قرب نهاية <body>) -->
   <script>
-    // 🔧 عدّل هذا لو تغيّر نطاق الباك-إند
+    // 🔧 غيّر الدومين لو غيّرت خدمة Render
     const BACKEND = 'https://xlop-cert-backend.onrender.com';
 
-    // 1) زر تنزيل ملف التعريف
+    // تنزيل بروفايل الـ UDID
     document.getElementById('get-udid-btn')?.addEventListener('click', () => {
-      // يحمّل بروفايل: /udid.mobileconfig
       window.location.href = BACKEND + '/udid.mobileconfig';
     });
 
-    // 2) قراءة ?udid= أو ?udid_error= من الرابط
+    // قراءة ?udid= أو ?udid_error=
     const params = new URLSearchParams(location.search);
     const udidParam = (params.get('udid') || '').trim();
     const hasError = params.has('udid_error');
 
-    const input = document.getElementById('udid-input');
-    const status = document.getElementById('status');
-    const copyBtn = document.getElementById('copy-btn');
-    const getBtn  = document.getElementById('get-udid-btn');
+    const input  = document.getElementById('udid-input');
+    const status = document.getElementById('pay-hint');
+    const payBtn = document.getElementById('pay-btn');
+
+    function togglePay() {
+      const hasUDID = !!input?.value?.trim();
+      payBtn.style.display = hasUDID ? 'inline-block' : 'none';
+    }
 
     if (udidParam) {
       input.value = udidParam.toUpperCase();
       input.readOnly = true;
-      if (getBtn) getBtn.style.display = 'none';
-      status.innerHTML = 'تم جلب رقم UDID تلقائيًا <span class="ok">✅</span>';
     } else if (hasError) {
-      status.innerHTML = 'تعذّر استخراج الـ UDID <span class="err">❌</span> — حاول مرة أخرى.';
-    } else {
-      status.textContent = 'اضغط “الحصول على UDID” ثم ثبّت الملف.';
-    }
-
-    // 3) نسخ الرقم
-    copyBtn?.addEventListener('click', async () => {
-      if (!input.value) { status.textContent = 'لا يوجد رقم لنسخه.'; return; }
-      try { await navigator.clipboard.writeText(input.value); status.textContent = 'تم نسخ الرقم ✅'; }
-      catch { status.textContent = 'تعذّر النسخ — انسخه يدويًا.'; }
-    });
-
-    // 4) الدفع عبر Paymob
-    const payBtn = document.getElementById('pay-btn');
-    const payHint = document.getElementById('pay-hint');
-
-    function togglePay() {
-      const hasUDID = !!document.getElementById('udid-input')?.value;
-      payBtn.style.display = hasUDID ? 'inline-block' : 'none';
+      status.textContent = 'تعذّر استخراج الـ UDID — حاول مرة أخرى.';
     }
     togglePay();
 
-    payBtn?.addEventListener('click', async () => {
-      const udid = document.getElementById('udid-input')?.value?.trim();
-      if (!udid) { payHint.textContent = '⚠️ لازم تجيب الـ UDID أولاً.'; return; }
+    // نسخ
+    document.getElementById('copy-btn')?.addEventListener('click', async () => {
+      if (!input.value) return (status.textContent = 'لا يوجد رقم لنسخه.');
+      try { await navigator.clipboard.writeText(input.value); status.textContent = 'تم النسخ ✅'; }
+      catch { status.textContent = 'تعذّر النسخ—انسخ يدويًا.'; }
+    });
 
-      payBtn.disabled = true;
-      payHint.textContent = '⏳ يتم إنشاء رابط الدفع…';
+    // الدفع
+    payBtn?.addEventListener('click', async () => {
+      const udid = input?.value?.trim();
+      if (!udid) { status.textContent = 'جيب الـ UDID أولاً.'; return; }
+      payBtn.disabled = true; status.textContent = 'يتم إنشاء رابط الدفع…';
 
       try {
         const res = await fetch(`${BACKEND}/paymob/create-payment-link`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            udid,
-            amount_cents: 5900, // 59 SAR
-            currency: 'SAR',
-          })
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ udid, amount_cents: 5900, currency: 'SAR' }) // 59 ر.س
         });
-
         const data = await res.json();
         if (!res.ok) throw new Error(data?.message || 'فشل إنشاء رابط الدفع');
 
         const payUrl = data.redirect_url || data.iframe_url || data.url;
         if (!payUrl) throw new Error('لم يصل رابط دفع صالح');
 
-        window.location.href = payUrl;
+        location.href = payUrl;
       } catch (e) {
-        payHint.textContent = '❌ تعذّر إنشاء رابط الدفع. جرّب لاحقًا.';
         console.error(e);
+        status.textContent = 'تعذّر إنشاء رابط الدفع. جرّب لاحقًا.';
       } finally {
         payBtn.disabled = false;
       }
